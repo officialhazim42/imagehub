@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Photo Editor – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="shared.js"></script>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:var(--a6)"><i class="fas fa-sliders-h"></i></div>
+    <h1>Photo Editor</h1>
+    <p>Adjust brightness, contrast, saturation, apply filters, and add text — all live in the preview.</p>
+  </div>
+  <div class="drop-area" id="drop" onclick="document.getElementById('fin').click()">
+    <i class="fas fa-cloud-upload-alt"></i>
+    <div class="dl">Drop an image here or click to upload</div>
+    <div class="ds">JPG, PNG or WebP</div>
+  </div>
+  <input type="file" id="fin" accept="image/*" hidden/>
+  <div class="canvas-stage" id="stage"><canvas id="cv" style="cursor:default"></canvas></div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="control-row">
+      <label>Filter</label>
+      <div class="chip-group" id="filterChips">
+        <div class="chip active" data-f="none">None</div>
+        <div class="chip" data-f="grayscale">Grayscale</div>
+        <div class="chip" data-f="sepia">Sepia</div>
+        <div class="chip" data-f="invert">Invert</div>
+        <div class="chip" data-f="vintage">Vintage</div>
+      </div>
+    </div>
+    <div class="control-row"><label>Brightness</label><input type="range" id="brightness" min="0" max="200" value="100" oninput="onAdj()"/><span class="val" id="brVal">100%</span></div>
+    <div class="control-row"><label>Contrast</label><input type="range" id="contrast" min="0" max="200" value="100" oninput="onAdj()"/><span class="val" id="ctVal">100%</span></div>
+    <div class="control-row"><label>Saturation</label><input type="range" id="saturation" min="0" max="200" value="100" oninput="onAdj()"/><span class="val" id="stVal">100%</span></div>
+    <div class="control-row"><label>Blur</label><input type="range" id="blur" min="0" max="10" value="0" oninput="onAdj()"/><span class="val" id="blVal">0px</span></div>
+    <div class="control-row"><label>Add text</label><input type="text" id="capText" placeholder="Optional caption" style="flex:1" oninput="onAdj()"/></div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-secondary" onclick="resetAll()"><i class="fas fa-rotate-left"></i> Reset</button>
+    <button class="btn btn-primary" id="goBtn" disabled onclick="exportImage()"><i class="fas fa-eye"></i> Create Preview</button>
+    <button class="btn btn-secondary" onclick="clearAll()"><i class="fas fa-trash"></i> Clear</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+let currentImg=null, filter='none';
+const drop=document.getElementById('drop'),fin=document.getElementById('fin'),goBtn=document.getElementById('goBtn');
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+fin.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0]);fin.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+
+document.querySelectorAll('#filterChips .chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('#filterChips .chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');filter=c.dataset.f;render();
+});
+
+async function handleFile(file){
+  const {img}=await loadImageFile(file);
+  currentImg=img;
+  document.getElementById('stage').classList.add('show');
+  document.getElementById('controls').style.display='flex';
+  goBtn.disabled=false;
+  render();
+}
+function onAdj(){
+  document.getElementById('brVal').textContent=document.getElementById('brightness').value+'%';
+  document.getElementById('ctVal').textContent=document.getElementById('contrast').value+'%';
+  document.getElementById('stVal').textContent=document.getElementById('saturation').value+'%';
+  document.getElementById('blVal').textContent=document.getElementById('blur').value+'px';
+  render();
+}
+
+function buildFilterString(){
+  const b=document.getElementById('brightness').value;
+  const c=document.getElementById('contrast').value;
+  const s=document.getElementById('saturation').value;
+  const bl=document.getElementById('blur').value;
+  let f=`brightness(${b}%) contrast(${c}%) saturate(${s}%) blur(${bl}px)`;
+  if(filter==='grayscale')f+=' grayscale(100%)';
+  if(filter==='sepia')f+=' sepia(80%)';
+  if(filter==='invert')f+=' invert(100%)';
+  if(filter==='vintage')f+=' sepia(35%) contrast(115%) saturate(85%)';
+  return f;
+}
+
+function render(){
+  if(!currentImg)return;
+  cv.width=currentImg.naturalWidth;cv.height=currentImg.naturalHeight;
+  ctx.filter=buildFilterString();
+  ctx.drawImage(currentImg,0,0);
+  ctx.filter='none';
+  const cap=document.getElementById('capText').value;
+  if(cap){
+    const size=Math.max(18,cv.width*0.045);
+    ctx.font=`700 ${size}px 'DM Sans',sans-serif`;
+    ctx.textAlign='center';
+    ctx.fillStyle='rgba(0,0,0,.45)';
+    ctx.fillRect(0,cv.height-size*1.8,cv.width,size*1.8);
+    ctx.fillStyle='#fff';
+    ctx.fillText(cap,cv.width/2,cv.height-size*0.6);
+  }
+}
+
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+async function exportImage(){
+  goBtn.disabled=true;showStatus('Preparing download…','info');
+  try{
+    const blob=await canvasToBlob(cv,'image/png');
+    downloadBlob(blob,'edited.png');
+    saveHistoryTool('Photo Editor','tools/photo-editor.html');
+    showStatus('✓ Ready to download!','success');
+  }catch(e){showStatus('Error: '+e.message,'error')}
+  goBtn.disabled=false;
+}
+function resetAll(){
+  ['brightness','contrast','saturation'].forEach(id=>document.getElementById(id).value=100);
+  document.getElementById('blur').value=0;
+  document.getElementById('capText').value='';
+  filter='none';
+  document.querySelectorAll('#filterChips .chip').forEach(x=>x.classList.remove('active'));
+  document.querySelector('#filterChips .chip[data-f="none"]').classList.add('active');
+  onAdj();
+}
+function clearAll(){
+  resetToolUploadState(()=>{
+    currentImg=null;
+    document.getElementById('stage').classList.remove('show');
+    document.getElementById('controls').style.display='none';
+    goBtn.disabled=true;
+    document.getElementById('status').className='status';
+  });
+}
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>

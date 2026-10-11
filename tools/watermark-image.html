@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Watermark IMAGE – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="shared.js"></script>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:#facc15"><i class="fas fa-stamp"></i></div>
+    <h1>Watermark IMAGE</h1>
+    <p>Stamp a text watermark onto your image — single mark or tiled across the whole photo.</p>
+  </div>
+  <div class="drop-area" id="drop" onclick="document.getElementById('fin').click()">
+    <i class="fas fa-cloud-upload-alt"></i>
+    <div class="dl">Drop an image here or click to upload</div>
+    <div class="ds">JPG, PNG or WebP</div>
+  </div>
+  <input type="file" id="fin" accept="image/*" hidden/>
+  <div class="canvas-stage" id="stage"><canvas id="cv"></canvas></div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="control-row"><label>Text</label><input type="text" id="wmText" value="ImageHub" style="flex:1" oninput="render()"/></div>
+    <div class="control-row">
+      <label>Position</label>
+      <div class="chip-group" id="posChips">
+        <div class="chip" data-p="tl">Top-left</div><div class="chip" data-p="tr">Top-right</div>
+        <div class="chip active" data-p="br">Bottom-right</div><div class="chip" data-p="bl">Bottom-left</div>
+        <div class="chip" data-p="center">Center</div><div class="chip" data-p="tile">Tiled</div>
+      </div>
+    </div>
+    <div class="control-row"><label>Font size</label><input type="range" id="wmSize" min="12" max="120" value="32" oninput="onSize()"/><span class="val" id="sizeVal">32px</span></div>
+    <div class="control-row"><label>Opacity</label><input type="range" id="wmOpacity" min="10" max="100" value="55" oninput="onOpacity()"/><span class="val" id="opVal">55%</span></div>
+    <div class="control-row">
+      <label>Color</label>
+      <div class="chip-group">
+        <div class="chip active" data-c="#ffffff" onclick="setColor('#ffffff',this)">White</div>
+        <div class="chip" data-c="#000000" onclick="setColor('#000000',this)">Black</div>
+        <div class="chip" data-c="#7c6aff" onclick="setColor('#7c6aff',this)">Purple</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="goBtn" disabled onclick="exportImage()"><i class="fas fa-eye"></i> Create Preview</button>
+    <button class="btn btn-secondary" onclick="clearAll()"><i class="fas fa-trash"></i> Clear</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+let currentImg=null, position='br', color='#ffffff';
+const drop=document.getElementById('drop'),fin=document.getElementById('fin'),goBtn=document.getElementById('goBtn');
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+fin.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0]);fin.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+
+document.querySelectorAll('#posChips .chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('#posChips .chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');position=c.dataset.p;render();
+});
+function setColor(c,el){color=c;document.querySelectorAll('[data-c]').forEach(x=>x.classList.remove('active'));el.classList.add('active');render()}
+function onSize(){document.getElementById('sizeVal').textContent=document.getElementById('wmSize').value+'px';render()}
+function onOpacity(){document.getElementById('opVal').textContent=document.getElementById('wmOpacity').value+'%';render()}
+
+async function handleFile(file){
+  const {img}=await loadImageFile(file);
+  currentImg=img;
+  document.getElementById('stage').classList.add('show');
+  document.getElementById('controls').style.display='flex';
+  goBtn.disabled=false;
+  render();
+}
+
+function render(){
+  if(!currentImg)return;
+  cv.width=currentImg.naturalWidth;cv.height=currentImg.naturalHeight;
+  ctx.drawImage(currentImg,0,0);
+  const text=document.getElementById('wmText').value||'ImageHub';
+  const size=parseInt(document.getElementById('wmSize').value);
+  const opacity=document.getElementById('wmOpacity').value/100;
+  ctx.font=`700 ${size}px 'DM Sans',sans-serif`;
+  ctx.fillStyle=color;
+  ctx.globalAlpha=opacity;
+  const metrics=ctx.measureText(text);
+  const pad=size*0.6;
+  if(position==='tile'){
+    ctx.textBaseline='middle';ctx.textAlign='center';
+    const stepX=metrics.width+pad*3, stepY=size*3;
+    for(let y=stepY/2;y<cv.height+stepY;y+=stepY){
+      for(let x=stepX/2;x<cv.width+stepX;x+=stepX){
+        ctx.save();ctx.translate(x,y);ctx.rotate(-0.4);ctx.fillText(text,0,0);ctx.restore();
+      }
+    }
+  } else {
+    ctx.textBaseline='alphabetic';
+    let x,y;
+    ctx.textAlign='left';
+    if(position==='tl'){x=pad;y=pad+size}
+    else if(position==='tr'){x=cv.width-metrics.width-pad;y=pad+size}
+    else if(position==='bl'){x=pad;y=cv.height-pad}
+    else if(position==='br'){x=cv.width-metrics.width-pad;y=cv.height-pad}
+    else{ctx.textAlign='center';x=cv.width/2;y=cv.height/2}
+    ctx.fillText(text,x,y);
+  }
+  ctx.globalAlpha=1;
+}
+
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+async function exportImage(){
+  goBtn.disabled=true;showStatus('Preparing download…','info');
+  try{
+    const blob=await canvasToBlob(cv,'image/png');
+    downloadBlob(blob,'watermarked.png');
+    saveHistoryTool('Watermark IMAGE','tools/watermark-image.html');
+    showStatus('✓ Ready to download!','success');
+  }catch(e){showStatus('Error: '+e.message,'error')}
+  goBtn.disabled=false;
+}
+function clearAll(){
+  resetToolUploadState(()=>{
+    currentImg=null;
+    document.getElementById('stage').classList.remove('show');
+    document.getElementById('controls').style.display='none';
+    goBtn.disabled=true;
+    document.getElementById('status').className='status';
+  });
+}
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>History – ImageHub</title><link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="tools/shared.css"><style>.info-wrap{max-width:850px;margin:auto;padding:56px 6% 80px}.info-wrap h1{font:800 clamp(2rem,5vw,3.4rem) Syne;margin:15px 0 8px}.intro{color:var(--muted);line-height:1.7}.history-list{display:grid;gap:10px;margin-top:28px}.history-row{display:flex;align-items:center;gap:14px;padding:16px;background:var(--s1);border:1px solid var(--border);border-radius:12px}.history-row i{color:var(--accent);width:22px;text-align:center}.history-row a{color:var(--text);font-weight:600;text-decoration:none;flex:1}.history-row a:hover{color:var(--accent)}.history-row small{color:var(--muted)}.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:12px}.action-row{margin-top:20px}.btn{display:inline-flex}.danger{color:var(--a2);border-color:rgba(255,95,126,.3)}</style><script src="tools/shared.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script></head><body><nav><a class="logo" href="index.html" aria-label="ImageHub home"><img src="icons/imagehub-logo.svg" alt="ImageHub"/></a><div class="nav-right-tools"><a class="back" href="index.html"><i class="fas fa-chevron-left"></i> All Tools</a><div class="theme-toggle" onclick="toggleTheme()"><span class="t-label" id="themeLabel">Dark</span><div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div></div></div></nav><main class="info-wrap"><div class="badge"><i class="fas fa-clock-rotate-left"></i> Local history</div><h1>Your recent tools</h1><p class="intro">ImageHub remembers up to six recently opened or exported tools in this browser. No file contents are saved here.</p><div id="historyList" class="history-list"></div><div class="action-row"><button class="btn btn-secondary danger" type="button" onclick="clearHistory()"><i class="fas fa-trash"></i> Clear history</button></div></main><footer class="tool-footer"><a class="tf-logo" href="index.html">ImageHub</a><p>Free forever · No sign-up · Files never leave your device</p></footer><script>
+function readHistory(){
+  try{return JSON.parse(localStorage.getItem('imagehub-history-tools')||'[]')}catch(e){return []}
+}
+function renderHistory(){
+  const list=document.getElementById('historyList');
+  const items=readHistory();
+  if(!items.length){
+    list.innerHTML='<div class="empty"><i class="fas fa-clock"></i><br>No tools used yet. Open a tool from the home page to start your history.</div>';
+    return;
+  }
+  list.innerHTML='';
+  items.forEach(item=>{
+    const row=document.createElement('div');
+    row.className='history-row';
+    const icon=document.createElement('i');
+    icon.className='fas fa-wand-magic-sparkles';
+    const link=document.createElement('a');
+    link.href=item.url||'index.html';
+    link.textContent=item.name||'Open tool';
+    const meta=document.createElement('small');
+    meta.innerHTML='Open tool <i class="fas fa-arrow-right"></i>';
+    row.append(icon, link, meta);
+    list.appendChild(row);
+  });
+}
+function clearHistory(){localStorage.removeItem('imagehub-history-tools');renderHistory()}renderHistory();
+</script></body></html>

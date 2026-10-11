@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Meme Generator – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="shared.js"></script>
+<style>#cv{cursor:default}</style>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:var(--a6)"><i class="fas fa-face-laugh-squint"></i></div>
+    <h1>Meme Generator</h1>
+    <p>Upload an image, add your caption text, and export — classic top/bottom meme style.</p>
+  </div>
+  <div class="drop-area" id="drop" onclick="document.getElementById('fin').click()">
+    <i class="fas fa-cloud-upload-alt"></i>
+    <div class="dl">Drop an image here or click to upload</div>
+    <div class="ds">JPG, PNG or WebP</div>
+  </div>
+  <input type="file" id="fin" accept="image/*" hidden/>
+  <div class="canvas-stage" id="stage"><canvas id="cv"></canvas></div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="control-row"><label>Top text</label><input type="text" id="topText" value="TOP TEXT" style="flex:1" oninput="render()"/></div>
+    <div class="control-row"><label>Bottom text</label><input type="text" id="botText" value="BOTTOM TEXT" style="flex:1" oninput="render()"/></div>
+    <div class="control-row"><label>Font size</label><input type="range" id="fsize" min="20" max="90" value="48" oninput="onSize()"/><span class="val" id="sizeVal">48px</span></div>
+    <div class="control-row">
+      <label>Text color</label>
+      <div class="chip-group">
+        <div class="chip active" data-c="#ffffff" onclick="setColor('#ffffff',this)">White</div>
+        <div class="chip" data-c="#000000" onclick="setColor('#000000',this)">Black</div>
+        <div class="chip" data-c="#ffe135" onclick="setColor('#ffe135',this)">Yellow</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="goBtn" disabled onclick="exportImage()"><i class="fas fa-eye"></i> Create Preview</button>
+    <button class="btn btn-secondary" onclick="clearAll()"><i class="fas fa-trash"></i> Clear</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+let currentImg=null, color='#ffffff';
+const drop=document.getElementById('drop'),fin=document.getElementById('fin'),goBtn=document.getElementById('goBtn');
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+fin.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0]);fin.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+
+async function handleFile(file){
+  const {img}=await loadImageFile(file);
+  currentImg=img;
+  document.getElementById('stage').classList.add('show');
+  document.getElementById('controls').style.display='flex';
+  goBtn.disabled=false;
+  render();
+}
+function setColor(c,el){color=c;document.querySelectorAll('[data-c]').forEach(x=>x.classList.remove('active'));el.classList.add('active');render()}
+function onSize(){document.getElementById('sizeVal').textContent=document.getElementById('fsize').value+'px';render()}
+
+function drawMemeText(text,y,size){
+  if(!text)return;
+  ctx.font=`900 ${size}px Impact, 'Arial Black', sans-serif`;
+  ctx.textAlign='center';
+  ctx.lineWidth=size/12;
+  ctx.strokeStyle='#000';
+  ctx.fillStyle=color;
+  const maxWidth=cv.width*0.92;
+  const words=text.toUpperCase().split(' ');
+  let lines=[],line='';
+  words.forEach(w=>{
+    const test=line?line+' '+w:w;
+    if(ctx.measureText(test).width>maxWidth && line){lines.push(line);line=w}
+    else line=test;
+  });
+  lines.push(line);
+  lines.forEach((l,i)=>{
+    const ly=y+i*size*1.05;
+    ctx.strokeText(l,cv.width/2,ly);
+    ctx.fillText(l,cv.width/2,ly);
+  });
+}
+
+function render(){
+  if(!currentImg)return;
+  cv.width=currentImg.naturalWidth;cv.height=currentImg.naturalHeight;
+  ctx.drawImage(currentImg,0,0);
+  const size=parseInt(document.getElementById('fsize').value)*(cv.width/600);
+  const realSize=Math.max(16,Math.min(size,cv.width/6));
+  drawMemeText(document.getElementById('topText').value,realSize+10,realSize);
+  drawMemeText(document.getElementById('botText').value,cv.height-15,realSize);
+}
+
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+async function exportImage(){
+  goBtn.disabled=true;showStatus('Preparing download…','info');
+  try{
+    const blob=await canvasToBlob(cv,'image/png');
+    downloadBlob(blob,'meme.png');
+    saveHistoryTool('Meme Generator','tools/meme-generator.html');
+    showStatus('✓ Ready to download!','success');
+  }catch(e){showStatus('Error: '+e.message,'error')}
+  goBtn.disabled=false;
+}
+function clearAll(){
+  resetToolUploadState(()=>{
+    currentImg=null;
+    document.getElementById('stage').classList.remove('show');
+    document.getElementById('controls').style.display='none';
+    goBtn.disabled=true;
+    document.getElementById('status').className='status';
+  });
+}
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>

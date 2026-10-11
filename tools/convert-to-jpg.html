@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Convert to JPG – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="shared.js"></script>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:var(--a4)"><i class="fas fa-file-import"></i></div>
+    <h1>Convert to JPG</h1>
+    <p>Turn PNG, WebP, GIF, BMP or SVG images into JPG. You can add multiple files.</p>
+  </div>
+  <div class="drop-area" id="drop" onclick="document.getElementById('fin').click()">
+    <i class="fas fa-cloud-upload-alt"></i>
+    <div class="dl">Drop images here or click to upload</div>
+    <div class="ds">Multiple files supported</div>
+  </div>
+  <input type="file" id="fin" accept="image/*" multiple hidden/>
+  <div class="file-list" id="flist"></div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="control-row">
+      <label>Quality</label>
+      <input type="range" id="quality" min="10" max="100" value="90" oninput="document.getElementById('qval').textContent=this.value+'%'"/>
+      <span class="val" id="qval">90%</span>
+    </div>
+    <div class="control-row checkbox">
+      <label style="min-width:auto"><input type="checkbox" id="whiteBg" checked/> Fill transparent areas with white</label>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="goBtn" disabled onclick="convertAll()"><i class="fas fa-file-import"></i> Convert to JPG</button>
+    <button class="btn btn-secondary" onclick="clearAll()"><i class="fas fa-trash"></i> Clear</button>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="progress" id="prog"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<script>
+let files=[];
+const drop=document.getElementById('drop'),fin=document.getElementById('fin'),flist=document.getElementById('flist'),goBtn=document.getElementById('goBtn');
+fin.onchange=e=>{addFiles([...e.target.files]);fin.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');addFiles([...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')))};
+
+function addFiles(nf){files=[...files,...nf];render()}
+function render(){
+  flist.innerHTML='';
+  files.forEach((f,i)=>{
+    const d=document.createElement('div');d.className='file-item';
+    d.innerHTML=`<i class="fas fa-file-image"></i><span class="fn">${f.name}</span><span class="fs">${fmtSize(f.size)}</span><button class="rm" onclick="remove(${i})"><i class="fas fa-times"></i></button>`;
+    flist.appendChild(d);
+  });
+  goBtn.disabled=files.length===0;
+  document.getElementById('controls').style.display=files.length?'flex':'none';
+}
+function remove(i){files.splice(i,1);render()}
+function clearAll(){
+  resetToolUploadState(()=>{
+    files=[];render();document.getElementById('status').className='status';document.getElementById('prog').classList.remove('show');
+  });
+}
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+
+async function convertAll(){
+  goBtn.disabled=true;showStatus('Converting…','info');
+  const prog=document.getElementById('prog'),pbar=document.getElementById('pbar');
+  prog.classList.add('show');
+  try{
+    const q=document.getElementById('quality').value/100;
+    const whiteBg=document.getElementById('whiteBg').checked;
+    const results=[];
+    for(let i=0;i<files.length;i++){
+      pbar.style.width=((i)/files.length*90+5)+'%';
+      const {img}=await loadImageFile(files[i]);
+      const canvas=document.createElement('canvas');
+      canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+      const ctx=canvas.getContext('2d');
+      if(whiteBg){ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height)}
+      ctx.drawImage(img,0,0);
+      const blob=await canvasToBlob(canvas,'image/jpeg',q);
+      results.push({blob,name:files[i].name.replace(/\.[^.]+$/,'')+'.jpg',beforeSrc:img.src});
+    }
+    pbar.style.width='100%';
+    downloadBlob(results);
+    showStatus(`✓ Converted ${results.length} image${results.length===1?'':'s'}. Review the preview, then download.`,'success');
+    saveHistoryTool('Convert to JPG','tools/convert-to-jpg.html');
+  }catch(e){showStatus('Error: '+e.message,'error')}
+  goBtn.disabled=false;
+}
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>

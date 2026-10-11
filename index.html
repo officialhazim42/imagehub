@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="ImageHub — 13 free image tools. Compress, upscale, remove backgrounds, edit, convert & secure images. 100% browser-based, no upload, no login."/>
+<meta name="theme-color" content="#07070d"/>
+<link rel="icon" href="icons/imagehub-logo.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="icons/imagehub-logo.svg"/>
+<title>ImageHub – 13 Free Image Tools Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07070d;--s1:#0f0f1a;--s2:#161625;--border:#252538;
+  --text:#eeeef8;--muted:#6b6b8a;
+  --accent:#7c6aff;--a2:#ff5f7e;--a3:#00e5a0;--a4:#ffb347;--a5:#38d9f5;--a6:#c084fc;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 55% at 12% 5%,rgba(124,106,255,.09) 0%,transparent 55%),radial-gradient(ellipse 60% 45% at 88% 92%,rgba(255,95,126,.07) 0%,transparent 55%);pointer-events:none;z-index:0}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(7,7,13,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 6%}
+.logo{display:inline-flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--a2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px;text-decoration:none}
+.logo img{width:34px;height:34px;display:block;object-fit:contain}
+.nav-right{display:flex;align-items:center;gap:14px}
+.global-theme-toggle{display:flex;align-items:center;gap:8px;padding:4px 7px;border:1px solid var(--border);border-radius:9px;background:var(--s1);color:var(--text);cursor:pointer}
+.global-theme-toggle .t-label{font-size:.68rem;color:var(--text);font-weight:600}.global-theme-toggle .toggle-track{width:38px;height:22px}
+.menu-toggle{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:10px;background:var(--s1);color:var(--text);cursor:pointer;font-size:1rem;transition:border-color .2s,transform .2s}
+.menu-toggle:hover,.menu-toggle[aria-expanded="true"]{border-color:var(--accent);transform:translateY(-1px)}
+.site-menu{position:absolute;top:calc(100% + 10px);right:6%;width:min(310px,calc(100vw - 28px));padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(15,15,26,.97);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 18px 44px rgba(0,0,0,.3);display:none;z-index:500}
+.site-menu.open{display:block;animation:menuIn .18s ease-out}
+@keyframes menuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.menu-heading{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 12px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:.82rem}
+.menu-heading small{font:600 .62rem 'DM Sans',sans-serif;color:var(--a3);text-transform:uppercase;letter-spacing:1px}
+.menu-search{display:flex;gap:6px;padding-top:10px}
+.menu-search input{min-width:0;flex:1;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--s2);color:var(--text);font:500 .76rem 'DM Sans',sans-serif;outline:none}
+.menu-search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,106,255,.14)}
+.menu-search button{width:36px;border:1px solid var(--accent);border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
+.menu-list{display:grid;gap:5px;padding-top:10px}
+.menu-action{display:flex;align-items:center;gap:10px;width:100%;padding:10px 9px;border:0;border-radius:9px;background:transparent;color:var(--text);font:600 .78rem 'DM Sans',sans-serif;text-align:left;cursor:pointer;text-decoration:none}
+.menu-action:hover{background:#24243a;color:#fff}.menu-action i{width:18px;color:#9e91ff;text-align:center}.menu-action:hover i{color:#fff}
+.menu-action .menu-badge{margin-left:auto;min-width:19px;padding:2px 6px;border-radius:99px;background:rgba(255,95,126,.14);color:var(--a2);font-size:.62rem;text-align:center}
+.menu-note{padding:8px 9px 2px;color:var(--muted);font-size:.66rem;line-height:1.5}
+.menu-theme-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px;border-radius:9px;background:rgba(124,106,255,.06);color:var(--muted);font-size:.74rem}
+.menu-theme-row>span{display:flex;align-items:center;gap:8px}.menu-theme-row>span i{color:var(--accent)}
+.menu-theme-row .theme-toggle{display:flex;align-items:center;gap:7px}.menu-theme-row .t-label{font-size:.65rem;color:var(--muted)}
+body.light .site-menu{background:rgba(255,255,255,.98);border-color:#d5d5e8}
+body.light .menu-search input{background:#ebebf5;border-color:#d5d5e8}
+body.light .menu-action:hover{background:var(--s2);color:var(--text)}
+body.light .menu-action:hover i{color:var(--accent)}
+
+.history-toggle{position:relative;display:flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--s1);color:var(--text);cursor:pointer;user-select:none;transition:border-color .2s,transform .2s}
+.history-toggle:hover{border-color:var(--accent);transform:translateY(-1px)}
+.history-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(124,106,255,.1);color:var(--accent);font-size:.7rem}
+.history-label{font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.history-menu{position:absolute;top:calc(100% + 10px);right:0;min-width:220px;max-width:260px;padding:8px;border:1px solid var(--border);background:rgba(15,15,26,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:12px;box-shadow:0 16px 34px rgba(0,0,0,.22);display:none;flex-direction:column;gap:6px;z-index:400}
+.history-toggle.open .history-menu{display:flex}
+.history-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:8px;color:var(--text);text-decoration:none;font-size:.7rem;background:var(--s2);border:1px solid transparent}
+.history-item:hover{border-color:var(--accent);color:var(--text)}
+.history-empty{padding:10px 8px;color:var(--muted);font-size:.68rem;text-align:center;border:1px dashed var(--border);border-radius:8px}
+.theme-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.theme-toggle .t-label{font-size:.73rem;color:var(--muted);font-weight:600;transition:color .2s}
+.toggle-track{width:42px;height:24px;background:var(--s2);border-radius:99px;position:relative;transition:background .3s;border:1px solid var(--border);flex-shrink:0}
+.toggle-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;background:var(--accent);border-radius:50%;transition:transform .3s;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#fff}
+body.light .toggle-knob{transform:translateX(18px)}
+.theme-toggle:hover .toggle-track{border-color:var(--accent)}
+body{transition:background .3s,color .3s}
+
+.nav-socials{display:flex;gap:14px}
+.nav-socials a{color:var(--muted);font-size:.95rem;transition:color .2s,transform .2s;text-decoration:none}
+.nav-socials a:hover{color:var(--text);transform:translateY(-2px)}
+@media(max-width:600px){.nav-socials{display:none}}
+
+/* ── LIGHT THEME ── */
+body.light{
+  --bg:#f2f2f8;--s1:#ffffff;--s2:#ebebf5;--border:#d5d5e8;
+  --text:#18182e;--muted:#6868a0;--muted2:#aaaacc;
+  --shadow:0 8px 32px rgba(0,0,0,.1);
+  --nav-bg:rgba(242,242,248,.94);--modal-bg:rgba(0,0,0,.45);
+  --card-hover-bg:rgba(124,106,255,.05);
+  --glow-1:rgba(124,106,255,.05);--glow-2:rgba(255,95,126,.04);
+  --toggle-bg:#d5d5e8;
+}
+body.light .badge{color:#2a8a5a;border-color:rgba(0,180,100,.3);background:rgba(0,180,100,.08)}
+body.light .pill.green{background:rgba(0,180,100,.08);border-color:rgba(0,180,100,.25);color:#1a7a50}
+body.light .pill.purple{background:rgba(100,80,220,.08);border-color:rgba(100,80,220,.25);color:#5040b0}
+body.light .pill.pink{background:rgba(220,60,90,.08);border-color:rgba(220,60,90,.25);color:#aa2244}
+body.light .soc:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}
+body.light .cat-tab:hover,body.light .cat-tab.active{box-shadow:0 4px 14px rgba(100,80,220,.2)}
+body.light .card:hover{background:var(--card-hover-bg)}
+body.light .toggle-knob{transform:translateX(18px)}
+
+/* HERO */
+.hero{position:relative;z-index:1;padding:68px 6% 40px;text-align:center}
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--a3);border:1px solid rgba(0,229,160,.22);background:rgba(0,229,160,.06);padding:5px 14px;border-radius:99px;margin-bottom:22px}
+.dot{width:6px;height:6px;background:var(--a3);border-radius:50%;animation:blink 1.5s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,5.5vw,4.2rem);font-weight:800;letter-spacing:-2px;line-height:1.07;margin-bottom:18px}
+h1 .g{background:linear-gradient(135deg,var(--accent) 20%,var(--a2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--muted);font-size:1.05rem;max-width:520px;margin:0 auto 32px;line-height:1.7;font-weight:400}
+.hero-pills{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:32px}
+.pill{font-size:.72rem;font-weight:600;padding:5px 12px;border-radius:99px;border:1px solid var(--border);background:var(--s1);color:var(--muted);display:flex;align-items:center;gap:5px}
+.pill i{font-size:.7rem}
+.pill.green{border-color:rgba(0,229,160,.25);color:var(--a3);background:rgba(0,229,160,.06)}
+.pill.purple{border-color:rgba(124,106,255,.25);color:#b3acff;background:rgba(124,106,255,.06)}
+.pill.pink{border-color:rgba(255,95,126,.25);color:#ff9fb5;background:rgba(255,95,126,.06)}
+
+/* STATS */
+.stats{display:flex;justify-content:center;gap:0;background:var(--s1);border:1px solid var(--border);border-radius:14px;max-width:480px;margin:0 auto 36px;overflow:hidden}
+.stat{flex:1;padding:16px 10px;text-align:center;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat .n{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--accent),#b9acff);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.stat .l{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-top:3px}
+
+/* SEARCH */
+.search-wrap{max-width:440px;margin:0 auto 52px;position:relative}
+.search-wrap i.si{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none}
+.search-wrap input{width:100%;background:var(--s1);border:1.5px solid var(--border);color:var(--text);padding:13px 42px 13px 42px;border-radius:12px;font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,106,255,.18)}
+.search-wrap .clear-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:4px;display:none}
+.search-wrap input:not(:placeholder-shown)+.clear-btn{display:block}
+
+/* CATEGORY TABS */
+.cat-tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;padding:0 6%}
+.cat-tab{font-size:.75rem;font-weight:600;padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:var(--s1);color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:5px}
+.cat-tab:hover,.cat-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 14px rgba(124,106,255,.3)}
+
+/* TOOLS SECTION */
+.tools-section{position:relative;z-index:1;max-width:1220px;margin:0 auto;padding:0 6% 80px}
+.cat{margin-bottom:50px;scroll-margin-top:80px}
+.cat-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.cat-ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.cat-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;letter-spacing:-.3px}
+.cat-cnt{margin-left:auto;font-size:.68rem;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:2px 9px;border-radius:99px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));gap:11px}
+
+/* TOOL CARD */
+.card{display:flex;flex-direction:column;gap:8px;background:var(--s1);border:1px solid var(--border);border-radius:13px;padding:17px 15px 14px;text-decoration:none;color:inherit;cursor:pointer;transition:background .2s,border-color .2s,transform .18s,box-shadow .2s;position:relative;overflow:hidden}
+.card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(255,255,255,.02));pointer-events:none}
+.card:hover{transform:translateY(-4px)}
+.fbadge{position:absolute;top:10px;right:10px;font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;background:rgba(0,229,160,.1);color:var(--a3);border:1px solid rgba(0,229,160,.22);padding:2px 7px;border-radius:5px}
+.c-ico{font-size:1.3rem;line-height:1}
+.c-name{font-size:.88rem;font-weight:600;line-height:1.3;color:var(--text)}
+.c-desc{font-size:.72rem;color:var(--muted);line-height:1.55;flex:1}
+.c-arr{font-size:.68rem;color:var(--muted);transition:transform .2s,color .2s;align-self:flex-start}
+.card:hover .c-arr{transform:translateX(4px);color:var(--text)}
+
+/* Category color themes */
+.c-optimize .cat-ic{background:rgba(0,229,160,.12);color:var(--a3)}
+.c-optimize .card:hover{border-color:rgba(0,229,160,.35);box-shadow:0 14px 36px rgba(0,229,160,.1);background:rgba(0,229,160,.03)}
+.c-optimize .c-ico{color:var(--a3)}
+.c-create .cat-ic{background:rgba(192,132,252,.12);color:var(--a6)}
+.c-create .card:hover{border-color:rgba(192,132,252,.35);box-shadow:0 14px 36px rgba(192,132,252,.1);background:rgba(192,132,252,.03)}
+.c-create .c-ico{color:var(--a6)}
+.c-modify .cat-ic{background:rgba(56,217,245,.12);color:var(--a5)}
+.c-modify .card:hover{border-color:rgba(56,217,245,.35);box-shadow:0 14px 36px rgba(56,217,245,.1);background:rgba(56,217,245,.03)}
+.c-modify .c-ico{color:var(--a5)}
+.c-convert .cat-ic{background:rgba(255,179,71,.12);color:var(--a4)}
+.c-convert .card:hover{border-color:rgba(255,179,71,.35);box-shadow:0 14px 36px rgba(255,179,71,.1);background:rgba(255,179,71,.03)}
+.c-convert .c-ico{color:var(--a4)}
+.c-security .cat-ic{background:rgba(250,204,21,.12);color:#facc15}
+.c-security .card:hover{border-color:rgba(250,204,21,.35);box-shadow:0 14px 36px rgba(250,204,21,.1);background:rgba(250,204,21,.03)}
+.c-security .c-ico{color:#facc15}
+
+/* NO RESULTS */
+#noResults{display:none;text-align:center;padding:60px 20px;color:var(--muted)}
+#noResults i{font-size:2.5rem;margin-bottom:14px;display:block;opacity:.4}
+#noResults p{font-size:.9rem}
+
+/* FOOTER */
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:52px 6% 36px;text-align:center}
+.f-logo{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--a2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;display:inline-block}
+.f-by{font-size:.82rem;color:var(--muted);margin-bottom:28px}
+.f-by a{color:var(--accent);text-decoration:none;font-weight:600}
+.f-by a:hover{text-decoration:underline}
+.socials{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-bottom:28px}
+.soc{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--muted);font-size:.78rem;font-weight:500;padding:7px 13px;background:var(--s1);border:1px solid var(--border);border-radius:9px;transition:all .2s;white-space:nowrap}
+.soc:hover{color:var(--text);border-color:var(--accent);background:var(--s2);transform:translateY(-2px);box-shadow:0 4px 14px rgba(124,106,255,.2)}
+.soc i{font-size:.9rem}
+.f-bottom{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.f-dot{width:3px;height:3px;border-radius:50%;background:var(--border)}
+.f-copy{font-size:.72rem;color:var(--muted);opacity:.5}
+
+/* SCROLL TO TOP */
+#scrollTop{position:fixed;bottom:24px;right:24px;z-index:100;background:var(--s2);border:1px solid var(--border);color:var(--muted);width:40px;height:40px;border-radius:10px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s;opacity:0;pointer-events:none}
+#scrollTop.show{opacity:1;pointer-events:all}
+#scrollTop:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* HIDDEN */
+.card.hidden{display:none}
+@media(max-width:540px){.grid{grid-template-columns:1fr 1fr}.stats{max-width:100%}}
+@media(max-width:700px){.nav-socials{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html" aria-label="ImageHub home"><img src="icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right">
+    <div class="nav-socials">
+      <a href="https://www.instagram.com/officialhazim42/" target="_blank" rel="noopener noreferrer" title="Instagram: officialhazim42"><i class="fab fa-instagram"></i></a>
+      <a href="https://x.com/officialhazim42" target="_blank" rel="noopener noreferrer" title="X: officialhazim42"><i class="fab fa-x-twitter"></i></a>
+      <a href="https://www.youtube.com/@officialhazim42" target="_blank" rel="noopener noreferrer" title="YouTube: officialhazim42"><i class="fab fa-youtube"></i></a>
+      <a href="https://github.com/officialhazim42" target="_blank" rel="noopener noreferrer" title="GitHub: officialhazim42"><i class="fab fa-github"></i></a>
+    </div>
+    <button class="global-theme-toggle" id="globalThemeToggle" type="button" onclick="toggleTheme()" title="Toggle light/dark mode"><span class="t-label" id="themeLabel">Dark</span><span class="toggle-track"><span class="toggle-knob" id="themeKnob"><i class="fas fa-moon"></i></span></span></button>
+    <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteMenu" title="Open menu"><i class="fas fa-bars"></i></button>
+    <div class="site-menu" id="siteMenu" aria-hidden="true">
+      <div class="menu-heading"><span>ImageHub control center</span><small>Local only</small></div>
+      <form class="menu-search" id="menuSearch"><input id="menuSearchInput" type="search" placeholder="Search tools..." aria-label="Search tools"/><button type="submit" title="Search"><i class="fas fa-arrow-right"></i></button></form>
+      <div class="menu-list">
+        <a class="menu-action" href="index.html"><i class="fas fa-house"></i><span>Home</span></a>
+        <a class="menu-action" href="guides.html"><i class="fas fa-book-open-reader"></i><span>Guides &amp; Tips</span></a>
+        <a class="menu-action" href="dashboard.html"><i class="fas fa-chart-line"></i><span>Dashboard &amp; Updates</span><span class="menu-badge" id="dashboardCount">0</span></a>
+        <a class="menu-action" href="history.html"><i class="fas fa-clock-rotate-left"></i><span>History</span></a>
+        <a class="menu-action" href="terms.html"><i class="fas fa-file-contract"></i><span>Terms and conditions</span></a>
+        <a class="menu-action" href="about.html"><i class="fas fa-circle-info"></i><span>About us</span></a>
+      </div>
+      <p class="menu-note">Your tools, history, and preferences stay in this browser.</p>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="badge"><div class="dot"></div>100% Free · No Login · No Upload to Server</div>
+  <h1>Every image tool<br>you'll ever <span class="g">need</span></h1>
+  <p class="sub">Compress, upscale, remove backgrounds, resize, convert & secure — all built right in your browser. Completely free, forever.</p>
+  <div class="hero-pills">
+    <div class="pill green"><i class="fas fa-shield-alt"></i> Files never leave your device</div>
+    <div class="pill purple"><i class="fas fa-bolt"></i> Instant — no waiting</div>
+    <div class="pill pink"><i class="fas fa-infinity"></i> Unlimited usage</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="n" data-target="13">0</div><div class="l">Tools</div></div>
+    <div class="stat"><div class="n">∞</div><div class="l">Free Uses</div></div>
+    <div class="stat"><div class="n" data-target="0">0</div><div class="l">Sign-ups</div></div>
+    <div class="stat"><div class="n">100%</div><div class="l">Private</div></div>
+  </div>
+  <div class="search-wrap">
+    <i class="fas fa-search si"></i>
+    <input type="text" id="searchInput" placeholder="Search tools… (compress, resize, background…)" oninput="doSearch(this.value)" autocomplete="off"/>
+    <button class="clear-btn" onclick="clearSearch()"><i class="fas fa-times"></i></button>
+  </div>
+</section>
+
+<!-- CATEGORY TABS -->
+<div class="cat-tabs" id="catTabs">
+  <a class="cat-tab active" href="#" onclick="filterCat(event,'all')"><i class="fas fa-th"></i> All Tools</a>
+  <a class="cat-tab" href="#optimize" onclick="filterCat(event,'optimize')"><i class="fas fa-tachometer-alt"></i> Optimize</a>
+  <a class="cat-tab" href="#create" onclick="filterCat(event,'create')"><i class="fas fa-wand-magic-sparkles"></i> Create</a>
+  <a class="cat-tab" href="#modify" onclick="filterCat(event,'modify')"><i class="fas fa-sliders-h"></i> Modify</a>
+  <a class="cat-tab" href="#convert" onclick="filterCat(event,'convert')"><i class="fas fa-arrows-rotate"></i> Convert</a>
+  <a class="cat-tab" href="#security" onclick="filterCat(event,'security')"><i class="fas fa-shield-alt"></i> Security</a>
+</div>
+
+<main class="tools-section">
+<div id="noResults"><i class="fas fa-search"></i><p>No tools found for "<span id="noQ"></span>"<br><small style="opacity:.6">Try: compress, resize, background, meme, crop…</small></p></div>
+
+<!-- OPTIMIZE -->
+<div class="cat c-optimize" id="optimize">
+  <div class="cat-head"><div class="cat-ic"><i class="fas fa-tachometer-alt"></i></div><div class="cat-name">Optimize</div><div class="cat-cnt">3 tools</div></div>
+  <div class="grid">
+    <a class="card" href="tools/compress-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-compress-alt"></i></div><div class="c-name">Compress IMAGE</div><div class="c-desc">Shrink image file size while keeping quality.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="tools/upscale.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-expand-arrows-alt"></i></div><div class="c-name">Upscale</div><div class="c-desc">Enlarge images without losing sharpness.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="tools/remove-background.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-eraser"></i></div><div class="c-name">Remove Background</div><div class="c-desc">Cut out backgrounds automatically in one click.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+  </div>
+</div>
+
+<!-- CREATE -->
+<div class="cat c-create" id="create">
+  <div class="cat-head"><div class="cat-ic"><i class="fas fa-wand-magic-sparkles"></i></div><div class="cat-name">Create</div><div class="cat-cnt">2 tools</div></div>
+  <div class="grid">
+    <a class="card" href="tools/meme-generator.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-face-laugh-squint"></i></div><div class="c-name">Meme Generator</div><div class="c-desc">Add captions to templates or your own images.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="tools/photo-editor.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-sliders-h"></i></div><div class="c-name">Photo Editor</div><div class="c-desc">Adjust brightness, filters, text and layers.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+  </div>
+</div>
+
+<!-- MODIFY -->
+<div class="cat c-modify" id="modify">
+  <div class="cat-head"><div class="cat-ic"><i class="fas fa-sliders-h"></i></div><div class="cat-name">Modify</div><div class="cat-cnt">3 tools</div></div>
+  <div class="grid">
+    <a class="card" href="tools/resize-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-arrows-alt-h"></i></div><div class="c-name">Resize IMAGE</div><div class="c-desc">Change dimensions by pixels, percent or preset.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="tools/crop-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-crop-alt"></i></div><div class="c-name">Crop IMAGE</div><div class="c-desc">Trim to any size or aspect ratio you need.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="tools/rotate-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-redo"></i></div><div class="c-name">Rotate IMAGE</div><div class="c-desc">Rotate or flip images to any angle.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+  </div>
+</div>
+
+<!-- CONVERT -->
+<div class="cat c-convert" id="convert">
+  <div class="cat-head"><div class="cat-ic"><i class="fas fa-arrows-rotate"></i></div><div class="cat-name">Convert</div><div class="cat-cnt">3 tools</div></div>
+  <div class="grid">
+    <a class="card" href="tools/convert-to-jpg.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-file-import"></i></div><div class="c-name">Convert to JPG</div><div class="c-desc">Turn PNG, WebP, HEIC and more into JPG.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="tools/convert-from-jpg.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-file-export"></i></div><div class="c-name">Convert from JPG</div><div class="c-desc">Turn JPG into PNG, WebP or other formats.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="tools/html-to-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-code"></i></div><div class="c-name">HTML to IMAGE</div><div class="c-desc">Turn HTML code or any URL into an image.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+  </div>
+</div>
+
+<!-- SECURITY -->
+<div class="cat c-security" id="security">
+  <div class="cat-head"><div class="cat-ic"><i class="fas fa-shield-alt"></i></div><div class="cat-name">Security</div><div class="cat-cnt">2 tools</div></div>
+  <div class="grid">
+    <a class="card" href="tools/watermark-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-stamp"></i></div><div class="c-name">Watermark IMAGE</div><div class="c-desc">Stamp text or logo watermarks onto images.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="tools/blur-face.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-user-secret"></i></div><div class="c-name">Blur Face</div><div class="c-desc">Detect and blur faces to protect privacy.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <div class="f-logo">ImageHub</div>
+  <div class="f-by">Free forever · No sign-up · Files never leave your device</div>
+  <div class="socials">
+    <a class="soc" href="https://www.instagram.com/officialhazim42/" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram · officialhazim42</a>
+    <a class="soc" href="https://x.com/officialhazim42" target="_blank" rel="noopener noreferrer"><i class="fab fa-x-twitter"></i> X · officialhazim42</a>
+    <a class="soc" href="https://www.youtube.com/@officialhazim42" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube" style="color:#ff0000"></i> YouTube · officialhazim42</a>
+    <a class="soc" href="https://github.com/officialhazim42" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub · officialhazim42</a>
+  </div>
+  <div class="f-bottom">
+    <span class="f-copy">©ImageHub</span><div class="f-dot"></div>
+    <span class="f-copy">All 13 tools free forever</span><div class="f-dot"></div>
+    <span class="f-copy">Your files never leave your device</span>
+  </div>
+</footer>
+
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top"><i class="fas fa-chevron-up"></i></button>
+
+<script>
+
+// ── THEME TOGGLE ─────────────────────────────────
+(function(){
+  const saved=localStorage.getItem('imagehub-theme')||'dark';
+  if(saved==='light'){
+    document.body.classList.add('light');
+    const lbl=document.getElementById('themeLabel');
+    const knob=document.getElementById('themeKnob');
+    if(lbl)lbl.textContent='Light';
+    if(knob)knob.innerHTML='<i class="fas fa-sun"></i>';
+  }
+})();
+
+function getHistoryTools(){
+  try{return JSON.parse(localStorage.getItem('imagehub-history-tools')||'[]');}catch{return []}
+}
+
+function saveHistoryTool(name,url){
+  const entries=getHistoryTools();
+  const cleanUrl=url||'index.html';
+  const next=[{name, url:cleanUrl}, ...entries.filter(item=>item.url!==cleanUrl && item.name!==name)].slice(0,6);
+  localStorage.setItem('imagehub-history-tools', JSON.stringify(next));
+}
+
+function toggleTheme(){
+  const isLight=document.body.classList.toggle('light');
+  localStorage.setItem('imagehub-theme',isLight?'light':'dark');
+  const lbl=document.getElementById('themeLabel');
+  const knob=document.getElementById('themeKnob');
+  if(lbl)lbl.textContent=isLight?'Light':'Dark';
+  if(knob)knob.innerHTML=isLight?'<i class="fas fa-sun"></i>':'<i class="fas fa-moon"></i>';
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  const homeItem={name:'ImageHub Home', url:'index.html'};
+  const history=getHistoryTools();
+  if(!history.some(item=>item.url==='index.html')){
+    saveHistoryTool(homeItem.name, homeItem.url);
+  }
+  document.querySelectorAll('.card').forEach(card => {
+    const name=card.querySelector('.c-name')?.textContent?.trim();
+    const link=card.getAttribute('href');
+    if(!name || !link) return;
+    card.addEventListener('click',()=>saveHistoryTool(name,link));
+  });
+});
+
+// Scroll to top button
+window.onscroll=()=>{document.getElementById('scrollTop').classList.toggle('show',window.scrollY>400)};
+
+// Animate stat numbers
+document.querySelectorAll('.n[data-target]').forEach(el=>{
+  const target=parseInt(el.dataset.target);
+  if(isNaN(target))return;
+  let current=0;const step=Math.ceil(target/30)||1;
+  const t=setInterval(()=>{current=Math.min(current+step,target);el.textContent=current;if(current>=target)clearInterval(t);},40);
+});
+
+// Search
+function doSearch(q){
+  q=q.toLowerCase().trim();
+  let visible=0;
+  document.querySelectorAll('.card').forEach(c=>{
+    const t=(c.querySelector('.c-name')?.textContent+' '+c.querySelector('.c-desc')?.textContent).toLowerCase();
+    const show=!q||t.includes(q);
+    c.classList.toggle('hidden',!show);
+    if(show)visible++;
+  });
+  document.querySelectorAll('.cat').forEach(cat=>{
+    const has=[...cat.querySelectorAll('.card')].some(c=>!c.classList.contains('hidden'));
+    cat.style.display=(!q||has)?'':'none';
+  });
+  const nr=document.getElementById('noResults');
+  nr.style.display=(!q||visible>0)?'none':'block';
+  if(!visible&&q)document.getElementById('noQ').textContent=q;
+  if(q)document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  else document.querySelector('.cat-tab').classList.add('active');
+}
+
+function clearSearch(){
+  document.getElementById('searchInput').value='';
+  doSearch('');
+}
+
+function getDashboardCount(){return getHistoryTools().length}
+function updateMenuState(){const count=document.getElementById('dashboardCount');if(count)count.textContent=getDashboardCount()}
+function toggleSiteMenu(force){
+  const toggle=document.getElementById('menuToggle'),menu=document.getElementById('siteMenu');
+  if(!toggle||!menu)return;
+  const open=typeof force==='boolean'?force:!menu.classList.contains('open');
+  menu.classList.toggle('open',open);menu.setAttribute('aria-hidden',String(!open));toggle.setAttribute('aria-expanded',String(open));
+  toggle.innerHTML=open?'<i class="fas fa-xmark"></i>':'<i class="fas fa-bars"></i>';
+}
+document.getElementById('menuToggle')?.addEventListener('click',event=>{event.stopPropagation();toggleSiteMenu();updateMenuState()});
+document.getElementById('menuSearch')?.addEventListener('submit',event=>{event.preventDefault();const query=document.getElementById('menuSearchInput').value;toggleSiteMenu(false);document.getElementById('searchInput').value=query;doSearch(query);document.getElementById('searchInput').focus()});
+document.addEventListener('click',event=>{if(!event.target.closest('#siteMenu')&&!event.target.closest('#menuToggle'))toggleSiteMenu(false)});
+updateMenuState();
+const initialSearch=new URLSearchParams(location.search).get('search');
+if(initialSearch){document.getElementById('searchInput').value=initialSearch;doSearch(initialSearch)}
+
+// Category filter tabs
+function filterCat(e,cat){
+  e.preventDefault();
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  e.currentTarget.classList.add('active');
+  document.getElementById('searchInput').value='';
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('hidden'));
+  if(cat==='all'){
+    document.querySelectorAll('.cat').forEach(c=>c.style.display='');
+    window.scrollTo({top:0,behavior:'smooth'});
+  } else {
+    document.querySelectorAll('.cat').forEach(c=>{
+      c.style.display=c.id===cat?'':'none';
+    });
+    const el=document.getElementById(cat);
+    if(el)setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  }
+}
+</script>
+</body>
+</html>

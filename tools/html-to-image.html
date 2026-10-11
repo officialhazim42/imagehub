@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HTML to IMAGE – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="shared.js"></script>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:var(--a4)"><i class="fas fa-code"></i></div>
+    <h1>HTML to IMAGE</h1>
+    <p>Paste HTML (with inline CSS) and render it as a downloadable PNG. Browsers can't screenshot an arbitrary external URL for security reasons, so paste the markup directly.</p>
+  </div>
+
+  <div class="controls" style="display:flex">
+    <div class="control-row" style="display:block">
+      <label style="display:block;margin-bottom:8px">HTML / CSS code</label>
+      <textarea id="codeIn">&lt;div style="font-family:sans-serif;padding:40px;background:linear-gradient(135deg,#7c6aff,#ff5f7e);color:#fff;border-radius:16px;width:400px"&gt;
+  &lt;h1 style="margin:0 0 10px"&gt;Hello!&lt;/h1&gt;
+  &lt;p style="margin:0;opacity:.9"&gt;Edit this HTML and click Render.&lt;/p&gt;
+&lt;/div&gt;</textarea>
+    </div>
+    <div class="control-row">
+      <label>Background</label>
+      <div class="chip-group">
+        <div class="chip active" data-bg="transparent">Transparent</div>
+        <div class="chip" data-bg="#ffffff">White</div>
+        <div class="chip" data-bg="#000000">Black</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="renderHtml()"><i class="fas fa-play"></i> Render Preview</button>
+  </div>
+
+  <div id="renderTarget" style="position:fixed;left:-99999px;top:0"></div>
+  <div class="preview-wrap" id="pwrap"><canvas id="outCanvas"></canvas></div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="goBtn" disabled onclick="downloadResult()"><i class="fas fa-eye"></i> Prepare Preview</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+let bg='transparent';
+document.querySelectorAll('[data-bg]').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('[data-bg]').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');bg=c.dataset.bg;
+});
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+
+async function renderHtml(){
+  showStatus('Rendering…','info');
+  const target=document.getElementById('renderTarget');
+  target.innerHTML=document.getElementById('codeIn').value;
+  try{
+    const canvas=await html2canvas(target,{backgroundColor:bg==='transparent'?null:bg,scale:2});
+    const out=document.getElementById('outCanvas');
+    out.width=canvas.width;out.height=canvas.height;
+    out.getContext('2d').drawImage(canvas,0,0);
+    document.getElementById('pwrap').classList.add('show');
+    document.getElementById('goBtn').disabled=false;
+    showStatus('✓ Rendered! Review the preview then download.','success');
+  }catch(e){showStatus('Error rendering HTML: '+e.message,'error')}
+}
+async function downloadResult(){
+  const out=document.getElementById('outCanvas');
+  const blob=await canvasToBlob(out,'image/png');
+  downloadBlob(blob,'html-render.png');
+  saveHistoryTool('HTML to IMAGE','tools/html-to-image.html');
+}
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>

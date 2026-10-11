@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Upscale IMAGE – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="shared.js"></script>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:var(--a3)"><i class="fas fa-expand-arrows-alt"></i></div>
+    <h1>Upscale</h1>
+    <p>Enlarge an image using smooth, high-quality interpolation and a light sharpen pass. This is a quality resize, not an AI super-resolution model — best for modest enlargements (2×–4×).</p>
+  </div>
+  <div class="drop-area" id="drop" onclick="document.getElementById('fin').click()">
+    <i class="fas fa-cloud-upload-alt"></i>
+    <div class="dl">Drop an image here or click to upload</div>
+    <div class="ds">JPG, PNG or WebP</div>
+  </div>
+  <input type="file" id="fin" accept="image/*" hidden/>
+  <div class="preview-wrap" id="pwrap"><img id="preview"/></div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="control-row">
+      <label>Scale factor</label>
+      <div class="chip-group">
+        <div class="chip" data-x="1.5">1.5×</div>
+        <div class="chip active" data-x="2">2×</div>
+        <div class="chip" data-x="3">3×</div>
+        <div class="chip" data-x="4">4×</div>
+      </div>
+    </div>
+    <div class="control-row checkbox">
+      <label style="min-width:auto"><input type="checkbox" id="sharpen" checked/> Apply sharpening pass</label>
+    </div>
+    <div class="control-row"><label>Original</label><span class="val" id="origDim" style="text-align:left">—</span></div>
+    <div class="control-row"><label>Output</label><span class="val" id="outDim" style="text-align:left;color:var(--a3)">—</span></div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="goBtn" disabled onclick="upscale()"><i class="fas fa-expand-arrows-alt"></i> Upscale Image</button>
+    <button class="btn btn-secondary" onclick="clearAll()"><i class="fas fa-trash"></i> Clear</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+let currentImg=null, factor=2;
+const drop=document.getElementById('drop'),fin=document.getElementById('fin'),goBtn=document.getElementById('goBtn');
+fin.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0]);fin.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+
+document.querySelectorAll('[data-x]').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('[data-x]').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');factor=parseFloat(c.dataset.x);updateOutDim();
+});
+
+async function handleFile(file){
+  const {img,url}=await loadImageFile(file);
+  currentImg=img;
+  document.getElementById('preview').src=url;
+  document.getElementById('pwrap').classList.add('show');
+  document.getElementById('controls').style.display='flex';
+  document.getElementById('origDim').textContent=`${img.naturalWidth} × ${img.naturalHeight}px`;
+  updateOutDim();
+  goBtn.disabled=false;
+}
+function updateOutDim(){
+  if(!currentImg)return;
+  document.getElementById('outDim').textContent=`${Math.round(currentImg.naturalWidth*factor)} × ${Math.round(currentImg.naturalHeight*factor)}px`;
+}
+
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+
+function sharpenCanvas(canvas){
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  const src=ctx.getImageData(0,0,w,h);
+  const dst=ctx.createImageData(w,h);
+  const k=[0,-1,0,-1,5,-1,0,-1,0];
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      for(let c=0;c<3;c++){
+        let sum=0,ki=0;
+        for(let dy=-1;dy<=1;dy++){
+          for(let dx=-1;dx<=1;dx++){
+            const yy=Math.min(h-1,Math.max(0,y+dy)), xx=Math.min(w-1,Math.max(0,x+dx));
+            sum+=src.data[(yy*w+xx)*4+c]*k[ki++];
+          }
+        }
+        dst.data[(y*w+x)*4+c]=Math.min(255,Math.max(0,sum));
+      }
+      dst.data[(y*w+x)*4+3]=src.data[(y*w+x)*4+3];
+    }
+  }
+  ctx.putImageData(dst,0,0);
+}
+
+async function upscale(){
+  goBtn.disabled=true;showStatus('Upscaling… this can take a moment for larger images.','info');
+  await new Promise(r=>setTimeout(r,30));
+  try{
+    const w=Math.round(currentImg.naturalWidth*factor), h=Math.round(currentImg.naturalHeight*factor);
+    // Two-step upscale for smoother interpolation on larger factors
+    const canvas=document.createElement('canvas');
+    canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d');
+    ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+    if(factor>2){
+      const mid=document.createElement('canvas');
+      mid.width=Math.round(currentImg.naturalWidth*Math.sqrt(factor));
+      mid.height=Math.round(currentImg.naturalHeight*Math.sqrt(factor));
+      const mctx=mid.getContext('2d');mctx.imageSmoothingQuality='high';
+      mctx.drawImage(currentImg,0,0,mid.width,mid.height);
+      ctx.drawImage(mid,0,0,w,h);
+    } else {
+      ctx.drawImage(currentImg,0,0,w,h);
+    }
+    if(document.getElementById('sharpen').checked && w*h<=4000*4000){
+      sharpenCanvas(canvas);
+    }
+    const blob=await canvasToBlob(canvas,'image/png');
+    downloadBlob(blob,`upscaled-${w}x${h}.png`);
+    saveHistoryTool('Upscale','tools/upscale.html');
+    showStatus(`✓ Upscaled to ${w}×${h}px!`,'success');
+  }catch(e){showStatus('Error: '+e.message,'error')}
+  goBtn.disabled=false;
+}
+function clearAll(){
+  resetToolUploadState(()=>{
+    currentImg=null;
+    document.getElementById('pwrap').classList.remove('show');
+    document.getElementById('controls').style.display='none';
+    goBtn.disabled=true;
+    document.getElementById('status').className='status';
+  });
+}
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>

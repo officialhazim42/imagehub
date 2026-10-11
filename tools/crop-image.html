@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Crop IMAGE – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="shared.js"></script>
+<style>
+.crop-stage{position:relative;display:inline-block;margin-top:16px;max-width:100%;touch-action:none}
+.crop-stage img{max-width:100%;display:block;border-radius:8px;user-select:none;pointer-events:none}
+.crop-box{position:absolute;border:2px solid var(--accent);box-shadow:0 0 0 9999px rgba(0,0,0,.5);cursor:move}
+.crop-box .handle{position:absolute;width:12px;height:12px;background:var(--accent);border-radius:3px}
+.crop-box .handle.nw{top:-6px;left:-6px;cursor:nwse-resize}
+.crop-box .handle.ne{top:-6px;right:-6px;cursor:nesw-resize}
+.crop-box .handle.sw{bottom:-6px;left:-6px;cursor:nesw-resize}
+.crop-box .handle.se{bottom:-6px;right:-6px;cursor:nwse-resize}
+</style>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:var(--a5)"><i class="fas fa-crop-alt"></i></div>
+    <h1>Crop IMAGE</h1>
+    <p>Drag the box to select the area to keep, then export.</p>
+  </div>
+  <div class="drop-area" id="drop" onclick="document.getElementById('fin').click()">
+    <i class="fas fa-cloud-upload-alt"></i>
+    <div class="dl">Drop an image here or click to upload</div>
+    <div class="ds">JPG, PNG or WebP</div>
+  </div>
+  <input type="file" id="fin" accept="image/*" hidden/>
+
+  <div style="text-align:center" id="stageWrap">
+    <div class="crop-stage" id="stage" style="display:none">
+      <img id="img"/>
+      <div class="crop-box" id="box">
+        <div class="handle nw"></div><div class="handle ne"></div><div class="handle sw"></div><div class="handle se"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="control-row">
+      <label>Aspect ratio</label>
+      <div class="chip-group">
+        <div class="chip active" data-r="0">Free</div>
+        <div class="chip" data-r="1">1:1</div>
+        <div class="chip" data-r="1.7778">16:9</div>
+        <div class="chip" data-r="0.75">3:4</div>
+        <div class="chip" data-r="1.3333">4:3</div>
+      </div>
+    </div>
+    <div class="control-row"><label>Selection</label><span class="val" id="selDim" style="text-align:left">—</span></div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="goBtn" disabled onclick="cropImage()"><i class="fas fa-crop-alt"></i> Crop Image</button>
+    <button class="btn btn-secondary" onclick="clearAll()"><i class="fas fa-trash"></i> Clear</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+let currentImg=null, ratio=0;
+const drop=document.getElementById('drop'),fin=document.getElementById('fin'),goBtn=document.getElementById('goBtn');
+const stage=document.getElementById('stage'),imgEl=document.getElementById('img'),box=document.getElementById('box');
+fin.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0]);fin.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+
+document.querySelectorAll('[data-r]').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('[data-r]').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');ratio=parseFloat(c.dataset.r);
+  if(ratio>0){const w=box.offsetWidth;box.style.height=(w/ratio)+'px';clampBox();}
+  updateSelLabel();
+});
+
+async function handleFile(file){
+  const {img,url}=await loadImageFile(file);
+  currentImg=img;
+  imgEl.onload=()=>{
+    stage.style.display='inline-block';
+    const w=imgEl.clientWidth,h=imgEl.clientHeight;
+    const bw=w*0.6,bh=h*0.6;
+    box.style.width=bw+'px';box.style.height=bh+'px';
+    box.style.left=((w-bw)/2)+'px';box.style.top=((h-bh)/2)+'px';
+    updateSelLabel();
+  };
+  imgEl.src=url;
+  document.getElementById('controls').style.display='flex';
+  goBtn.disabled=false;
+}
+
+function updateSelLabel(){
+  const scaleX=currentImg.naturalWidth/imgEl.clientWidth;
+  const scaleY=currentImg.naturalHeight/imgEl.clientHeight;
+  const w=Math.round(box.offsetWidth*scaleX),h=Math.round(box.offsetHeight*scaleY);
+  document.getElementById('selDim').textContent=`${w} × ${h}px`;
+}
+
+// Drag / resize logic
+let dragging=null,startX,startY,startBox;
+box.addEventListener('pointerdown',e=>{
+  const handle=e.target.closest('.handle');
+  dragging=handle?handle.className.split(' ')[1]:'move';
+  startX=e.clientX;startY=e.clientY;
+  startBox={left:box.offsetLeft,top:box.offsetTop,w:box.offsetWidth,h:box.offsetHeight};
+  e.preventDefault();e.stopPropagation();
+  document.addEventListener('pointermove',onDrag);
+  document.addEventListener('pointerup',onDragEnd);
+});
+function onDrag(e){
+  if(!dragging)return;
+  const dx=e.clientX-startX,dy=e.clientY-startY;
+  let {left,top,w,h}=startBox;
+  if(dragging==='move'){left+=dx;top+=dy}
+  else{
+    if(dragging.includes('e'))w+=dx;
+    if(dragging.includes('s'))h+=dy;
+    if(dragging.includes('w')){w-=dx;left+=dx}
+    if(dragging.includes('n')){h-=dy;top+=dy}
+    if(ratio>0)h=w/ratio;
+  }
+  box.style.left=left+'px';box.style.top=top+'px';
+  box.style.width=Math.max(20,w)+'px';box.style.height=Math.max(20,h)+'px';
+  clampBox();updateSelLabel();
+}
+function onDragEnd(){dragging=null;document.removeEventListener('pointermove',onDrag);document.removeEventListener('pointerup',onDragEnd)}
+function clampBox(){
+  const maxW=imgEl.clientWidth,maxH=imgEl.clientHeight;
+  let left=Math.max(0,Math.min(box.offsetLeft,maxW-box.offsetWidth));
+  let top=Math.max(0,Math.min(box.offsetTop,maxH-box.offsetHeight));
+  box.style.left=left+'px';box.style.top=top+'px';
+  if(box.offsetWidth>maxW)box.style.width=maxW+'px';
+  if(box.offsetHeight>maxH)box.style.height=maxH+'px';
+}
+
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+
+async function cropImage(){
+  goBtn.disabled=true;showStatus('Cropping…','info');
+  try{
+    const scaleX=currentImg.naturalWidth/imgEl.clientWidth;
+    const scaleY=currentImg.naturalHeight/imgEl.clientHeight;
+    const sx=box.offsetLeft*scaleX, sy=box.offsetTop*scaleY;
+    const sw=box.offsetWidth*scaleX, sh=box.offsetHeight*scaleY;
+    const canvas=document.createElement('canvas');
+    canvas.width=sw;canvas.height=sh;
+    canvas.getContext('2d').drawImage(currentImg,sx,sy,sw,sh,0,0,sw,sh);
+    const blob=await canvasToBlob(canvas,'image/png');
+    downloadBlob(blob,'cropped.png');
+    saveHistoryTool('Crop IMAGE','tools/crop-image.html');
+    showStatus('✓ Cropped successfully!','success');
+  }catch(e){showStatus('Error: '+e.message,'error')}
+  goBtn.disabled=false;
+}
+function clearAll(){
+  resetToolUploadState(()=>{
+    currentImg=null;stage.style.display='none';
+    document.getElementById('controls').style.display='none';
+    goBtn.disabled=true;
+    document.getElementById('status').className='status';
+  });
+}
+window.addEventListener('resize',()=>{if(currentImg)clampBox()});
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>

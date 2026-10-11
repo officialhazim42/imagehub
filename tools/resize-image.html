@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Resize IMAGE – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="shared.js"></script>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:var(--a5)"><i class="fas fa-arrows-alt-h"></i></div>
+    <h1>Resize IMAGE</h1>
+    <p>Change the exact dimensions of your image by pixels or percentage.</p>
+  </div>
+  <div class="drop-area" id="drop" onclick="document.getElementById('fin').click()">
+    <i class="fas fa-cloud-upload-alt"></i>
+    <div class="dl">Drop an image here or click to upload</div>
+    <div class="ds">JPG, PNG or WebP</div>
+  </div>
+  <input type="file" id="fin" accept="image/*" hidden/>
+  <div class="preview-wrap" id="pwrap"><img id="preview"/></div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="control-row">
+      <label>Mode</label>
+      <div class="chip-group">
+        <div class="chip active" data-mode="px" onclick="setMode('px')">Pixels</div>
+        <div class="chip" data-mode="pct" onclick="setMode('pct')">Percent</div>
+      </div>
+    </div>
+    <div class="control-row" id="pxRow">
+      <label>Width</label><input type="number" id="wIn" value="800" oninput="onW()"/>
+      <label style="min-width:auto">Height</label><input type="number" id="hIn" value="600" oninput="onH()"/>
+    </div>
+    <div class="control-row" id="pctRow" style="display:none">
+      <label>Scale</label>
+      <input type="range" id="pctRange" min="5" max="200" value="100" oninput="onPct()"/>
+      <span class="val" id="pctVal">100%</span>
+    </div>
+    <div class="control-row checkbox">
+      <label style="min-width:auto"><input type="checkbox" id="lockAspect" checked/> Lock aspect ratio</label>
+    </div>
+    <div class="control-row">
+      <label>Original</label>
+      <span class="val" id="origDim" style="text-align:left">—</span>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="goBtn" disabled onclick="resizeImage()"><i class="fas fa-arrows-alt-h"></i> Resize Image</button>
+    <button class="btn btn-secondary" onclick="clearAll()"><i class="fas fa-trash"></i> Clear</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+let currentImg=null, aspect=1, mode='px';
+const drop=document.getElementById('drop'),fin=document.getElementById('fin'),goBtn=document.getElementById('goBtn');
+fin.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0]);fin.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+
+async function handleFile(file){
+  const {img,url}=await loadImageFile(file);
+  currentImg=img;aspect=img.naturalWidth/img.naturalHeight;
+  document.getElementById('preview').src=url;
+  document.getElementById('pwrap').classList.add('show');
+  document.getElementById('controls').style.display='flex';
+  document.getElementById('origDim').textContent=`${img.naturalWidth} × ${img.naturalHeight}px`;
+  document.getElementById('wIn').value=img.naturalWidth;
+  document.getElementById('hIn').value=img.naturalHeight;
+  goBtn.disabled=false;
+}
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('[data-mode]').forEach(c=>c.classList.toggle('active',c.dataset.mode===m));
+  document.getElementById('pxRow').style.display=m==='px'?'flex':'none';
+  document.getElementById('pctRow').style.display=m==='pct'?'flex':'none';
+}
+function onW(){if(document.getElementById('lockAspect').checked){document.getElementById('hIn').value=Math.round(document.getElementById('wIn').value/aspect)}}
+function onH(){if(document.getElementById('lockAspect').checked){document.getElementById('wIn').value=Math.round(document.getElementById('hIn').value*aspect)}}
+function onPct(){document.getElementById('pctVal').textContent=document.getElementById('pctRange').value+'%'}
+
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+
+async function resizeImage(){
+  goBtn.disabled=true;showStatus('Resizing…','info');
+  try{
+    let w,h;
+    if(mode==='px'){w=parseInt(document.getElementById('wIn').value);h=parseInt(document.getElementById('hIn').value)}
+    else{const p=document.getElementById('pctRange').value/100;w=Math.round(currentImg.naturalWidth*p);h=Math.round(currentImg.naturalHeight*p)}
+    const canvas=document.createElement('canvas');
+    canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d');
+    ctx.imageSmoothingQuality='high';
+    ctx.drawImage(currentImg,0,0,w,h);
+    const blob=await canvasToBlob(canvas,'image/png');
+    downloadBlob(blob,`resized-${w}x${h}.png`);
+    saveHistoryTool('Resize IMAGE','tools/resize-image.html');
+    showStatus(`✓ Resized to ${w}×${h}px!`,'success');
+  }catch(e){showStatus('Error: '+e.message,'error')}
+  goBtn.disabled=false;
+}
+function clearAll(){
+  resetToolUploadState(()=>{
+    currentImg=null;
+    document.getElementById('pwrap').classList.remove('show');
+    document.getElementById('controls').style.display='none';
+    goBtn.disabled=true;
+    document.getElementById('status').className='status';
+  });
+}
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>

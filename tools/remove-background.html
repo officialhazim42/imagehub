@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Remove Background – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="shared.js"></script>
+<style>#cv{cursor:crosshair}</style>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:var(--a3)"><i class="fas fa-eraser"></i></div>
+    <h1>Remove Background</h1>
+    <p>Click on the background in the image. Similar-colored areas become transparent. Works best on plain or evenly-lit backgrounds — adjust the tolerance for tricky photos.</p>
+  </div>
+  <div class="drop-area" id="drop" onclick="document.getElementById('fin').click()">
+    <i class="fas fa-cloud-upload-alt"></i>
+    <div class="dl">Drop an image here or click to upload</div>
+    <div class="ds">JPG, PNG or WebP</div>
+  </div>
+  <input type="file" id="fin" accept="image/*" hidden/>
+  <div class="canvas-stage" id="stage"><canvas id="cv"></canvas></div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="control-row">
+      <label>Tolerance</label>
+      <input type="range" id="tol" min="5" max="120" value="35" oninput="document.getElementById('tolVal').textContent=this.value"/>
+      <span class="val" id="tolVal">35</span>
+    </div>
+    <div class="control-row checkbox">
+      <label style="min-width:auto"><input type="checkbox" id="feather" checked/> Soften edges</label>
+    </div>
+    <div class="control-row"><span style="color:var(--muted);font-size:.78rem">Click anywhere on the background below to remove it. Click again with a different spot to refine, or Undo.</span></div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-secondary" onclick="undoLast()"><i class="fas fa-rotate-left"></i> Undo</button>
+    <button class="btn btn-primary" id="goBtn" disabled onclick="exportImage()"><i class="fas fa-eye"></i> Create Preview</button>
+    <button class="btn btn-secondary" onclick="clearAll()"><i class="fas fa-trash"></i> Clear</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+let currentImg=null, history=[];
+const drop=document.getElementById('drop'),fin=document.getElementById('fin'),goBtn=document.getElementById('goBtn');
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+fin.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0]);fin.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+
+async function handleFile(file){
+  const {img}=await loadImageFile(file);
+  currentImg=img;history=[];
+  cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.drawImage(img,0,0);
+  document.getElementById('stage').classList.add('show');
+  document.getElementById('controls').style.display='flex';
+  goBtn.disabled=false;
+}
+
+cv.addEventListener('click',e=>{
+  const r=cv.getBoundingClientRect();
+  const scaleX=cv.width/r.width, scaleY=cv.height/r.height;
+  const x=Math.floor((e.clientX-r.left)*scaleX), y=Math.floor((e.clientY-r.top)*scaleY);
+  removeSimilarColor(x,y);
+});
+
+function removeSimilarColor(startX,startY){
+  history.push(ctx.getImageData(0,0,cv.width,cv.height));
+  const imgData=ctx.getImageData(0,0,cv.width,cv.height);
+  const data=imgData.data;
+  const w=cv.width,h=cv.height;
+  const idx=(startY*w+startX)*4;
+  const tR=data[idx],tG=data[idx+1],tB=data[idx+2];
+  const tol=parseInt(document.getElementById('tol').value);
+  const feather=document.getElementById('feather').checked;
+  for(let i=0;i<data.length;i+=4){
+    const dr=data[i]-tR, dg=data[i+1]-tG, db=data[i+2]-tB;
+    const dist=Math.sqrt(dr*dr+dg*dg+db*db);
+    if(dist<tol){
+      data[i+3]=0;
+    } else if(feather && dist<tol*1.8){
+      const t=(dist-tol)/(tol*0.8);
+      data[i+3]=Math.round(data[i+3]*Math.min(1,t));
+    }
+  }
+  ctx.putImageData(imgData,0,0);
+}
+function undoLast(){
+  if(history.length){ctx.putImageData(history.pop(),0,0)}
+}
+
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+async function exportImage(){
+  goBtn.disabled=true;showStatus('Preparing download…','info');
+  try{
+    const blob=await canvasToBlob(cv,'image/png');
+    downloadBlob(blob,'no-background.png');
+    saveHistoryTool('Remove Background','tools/remove-background.html');
+    showStatus('✓ Ready to download!','success');
+  }catch(e){showStatus('Error: '+e.message,'error')}
+  goBtn.disabled=false;
+}
+function clearAll(){
+  resetToolUploadState(()=>{
+    currentImg=null;history=[];
+    document.getElementById('stage').classList.remove('show');
+    document.getElementById('controls').style.display='none';
+    goBtn.disabled=true;
+    document.getElementById('status').className='status';
+  });
+}
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>

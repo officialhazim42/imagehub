@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">ImageHub logo</title>
+  <desc id="desc">Neon pink and purple image icon on a dark rounded square</desc>
+  <defs>
+    <linearGradient id="border" x1="8" y1="8" x2="88" y2="88" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7655ff"/>
+      <stop offset="1" stop-color="#ff3fa7"/>
+    </linearGradient>
+    <linearGradient id="mountain" x1="22" y1="68" x2="72" y2="30" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6045ff"/>
+      <stop offset="1" stop-color="#ff4cac"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="96" height="96" rx="21" fill="#080812"/>
+  <rect x="7" y="7" width="82" height="82" rx="18" fill="none" stroke="url(#border)" stroke-width="3" filter="url(#glow)"/>
+  <rect x="25" y="18" width="48" height="53" rx="9" fill="#090918" stroke="url(#border)" stroke-width="3" transform="rotate(7 49 44)"/>
+  <rect x="19" y="24" width="52" height="48" rx="9" fill="#090918" stroke="url(#border)" stroke-width="3"/>
+  <circle cx="34" cy="38" r="6" fill="url(#mountain)"/>
+  <path d="M24 64 36 50a4 4 0 0 1 6 0l15 16H25a4 4 0 0 1-1-2Z" fill="url(#mountain)"/>
+  <path d="m43 66 14-17a4 4 0 0 1 6 0l10 13v4H43Z" fill="url(#mountain)"/>
+</svg>

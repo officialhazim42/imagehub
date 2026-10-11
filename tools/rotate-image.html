@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Rotate IMAGE – ImageHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="shared.css"/>
+<script src="shared.js"></script>
+</head>
+<body>
+<div id="dlModal"></div>
+<nav>
+  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <div class="nav-right-tools">
+    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
+      <span class="t-label" id="themeLabel">Dark</span>
+      <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
+    </div>
+  </div>
+</nav>
+<div class="tool-wrap">
+  <div class="tool-header">
+    <div class="tool-icon" style="color:var(--a5)"><i class="fas fa-redo"></i></div>
+    <h1>Rotate IMAGE</h1>
+    <p>Rotate to any angle or flip horizontally / vertically.</p>
+  </div>
+  <div class="drop-area" id="drop" onclick="document.getElementById('fin').click()">
+    <i class="fas fa-cloud-upload-alt"></i>
+    <div class="dl">Drop an image here or click to upload</div>
+    <div class="ds">JPG, PNG or WebP</div>
+  </div>
+  <input type="file" id="fin" accept="image/*" hidden/>
+  <div class="canvas-stage" id="stage"><canvas id="cv"></canvas></div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="control-row">
+      <label>Quick rotate</label>
+      <div class="chip-group">
+        <div class="chip" onclick="quickRotate(-90)"><i class="fas fa-rotate-left"></i> -90°</div>
+        <div class="chip" onclick="quickRotate(90)"><i class="fas fa-rotate-right"></i> +90°</div>
+        <div class="chip" onclick="quickRotate(180)">180°</div>
+      </div>
+    </div>
+    <div class="control-row">
+      <label>Custom angle</label>
+      <input type="range" id="angle" min="-180" max="180" value="0" oninput="onAngle()"/>
+      <span class="val" id="angleVal">0°</span>
+    </div>
+    <div class="control-row">
+      <label>Flip</label>
+      <div class="chip-group">
+        <div class="chip" id="flipH" onclick="toggleFlip('h')"><i class="fas fa-left-right"></i> Horizontal</div>
+        <div class="chip" id="flipV" onclick="toggleFlip('v')"><i class="fas fa-up-down"></i> Vertical</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" id="goBtn" disabled onclick="exportImage()"><i class="fas fa-eye"></i> Create Preview</button>
+    <button class="btn btn-secondary" onclick="clearAll()"><i class="fas fa-trash"></i> Clear</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+let currentImg=null, angle=0, flipH=false, flipV=false;
+const drop=document.getElementById('drop'),fin=document.getElementById('fin'),goBtn=document.getElementById('goBtn');
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+fin.onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0]);fin.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+
+async function handleFile(file){
+  const {img}=await loadImageFile(file);
+  currentImg=img;angle=0;flipH=false;flipV=false;
+  document.getElementById('angle').value=0;onAngle();
+  document.getElementById('flipH').classList.remove('active');
+  document.getElementById('flipV').classList.remove('active');
+  document.getElementById('stage').classList.add('show');
+  document.getElementById('controls').style.display='flex';
+  goBtn.disabled=false;
+  render();
+}
+
+function render(){
+  const rad=angle*Math.PI/180;
+  const w=currentImg.naturalWidth,h=currentImg.naturalHeight;
+  const sin=Math.abs(Math.sin(rad)),cos=Math.abs(Math.cos(rad));
+  const nw=w*cos+h*sin, nh=w*sin+h*cos;
+  cv.width=nw;cv.height=nh;
+  ctx.save();
+  ctx.clearRect(0,0,nw,nh);
+  ctx.translate(nw/2,nh/2);
+  ctx.rotate(rad);
+  ctx.scale(flipH?-1:1,flipV?-1:1);
+  ctx.drawImage(currentImg,-w/2,-h/2,w,h);
+  ctx.restore();
+}
+function quickRotate(delta){
+  angle=((angle+delta+180)%360+360)%360-180;
+  document.getElementById('angle').value=angle;
+  onAngle();
+}
+function onAngle(){
+  angle=parseInt(document.getElementById('angle').value);
+  document.getElementById('angleVal').textContent=angle+'°';
+  render();
+}
+function toggleFlip(axis){
+  if(axis==='h'){flipH=!flipH;document.getElementById('flipH').classList.toggle('active',flipH)}
+  else{flipV=!flipV;document.getElementById('flipV').classList.toggle('active',flipV)}
+  render();
+}
+
+function showStatus(msg,type){const s=document.getElementById('status');s.textContent=msg;s.className='status show '+type}
+
+async function exportImage(){
+  goBtn.disabled=true;showStatus('Preparing download…','info');
+  try{
+    const blob=await canvasToBlob(cv,'image/png');
+    downloadBlob(blob,'rotated.png');
+    saveHistoryTool('Rotate IMAGE','tools/rotate-image.html');
+    showStatus('✓ Ready to download!','success');
+  }catch(e){showStatus('Error: '+e.message,'error')}
+  goBtn.disabled=false;
+}
+function clearAll(){
+  resetToolUploadState(()=>{
+    currentImg=null;
+    document.getElementById('stage').classList.remove('show');
+    document.getElementById('controls').style.display='none';
+    goBtn.disabled=true;
+    document.getElementById('status').className='status';
+  });
+}
+</script>
+<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+</body></html>
