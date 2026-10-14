@@ -4,13 +4,20 @@ ImageHub is a static, browser-based image utility site. Image processing runs lo
 
 ## Run Locally
 
-Open `index.html` in a browser, or serve the project directory with Python:
+Open `pages/index.html` in a browser, or serve the project directory with Python:
 
 ```sh
 python3 -m http.server 8000
 ```
 
-Then visit `http://localhost:8000`.
+Then visit `http://localhost:8000/pages/index.html`.
+
+## Project Structure
+
+- `pages/` contains the main site pages, including the home page, guides, history, dashboard, about, and terms pages.
+- `tools/` contains the individual image tool pages.
+- `assets/css/` and `assets/js/` contain shared styling and behavior.
+- `assets/icons/` contains the SVG icons used throughout the site.
 
 ## Using an Image Tool
 
@@ -24,7 +31,7 @@ Some tools support multiple input images. They show the first input and first re
 
 ## Shared Tool Behavior
 
-`tools/shared.js` provides the common menu, guides, history, comparison preview, reset, and download-confirmation behavior. `tools/shared.css` contains shared page and tool styles. Each tool page contains its own processing logic and calls `downloadBlob()` when its output is ready.
+`assets/js/shared.js` provides the common menu, guides, history, comparison preview, reset, and download-confirmation behavior. `assets/css/shared.css` contains shared page and tool styles. Each tool page contains its own processing logic and calls `downloadBlob()` when its output is ready.
 
 The download flow is intentionally staged:
 

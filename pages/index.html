@@ -5,11 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="description" content="ImageHub — 13 free image tools. Compress, upscale, remove backgrounds, edit, convert & secure images. 100% browser-based, no upload, no login."/>
 <meta name="theme-color" content="#07070d"/>
-<link rel="icon" href="icons/imagehub-logo.svg" type="image/svg+xml"/>
-<link rel="apple-touch-icon" href="icons/imagehub-logo.svg"/>
+<link rel="icon" href="../assets/icons/imagehub-logo.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="../assets/icons/imagehub-logo.svg"/>
 <title>ImageHub – 13 Free Image Tools Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="../assets/css/shared.css"/>
+<script src="../assets/js/shared.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -69,10 +71,6 @@ body.light .toggle-knob{transform:translateX(18px)}
 .theme-toggle:hover .toggle-track{border-color:var(--accent)}
 body{transition:background .3s,color .3s}
 
-.nav-socials{display:flex;gap:14px}
-.nav-socials a{color:var(--muted);font-size:.95rem;transition:color .2s,transform .2s;text-decoration:none}
-.nav-socials a:hover{color:var(--text);transform:translateY(-2px)}
-@media(max-width:600px){.nav-socials{display:none}}
 
 /* ── LIGHT THEME ── */
 body.light{
@@ -177,7 +175,6 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:52
 .f-by{font-size:.82rem;color:var(--muted);margin-bottom:28px}
 .f-by a{color:var(--accent);text-decoration:none;font-weight:600}
 .f-by a:hover{text-decoration:underline}
-.socials{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-bottom:28px}
 .soc{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--muted);font-size:.78rem;font-weight:500;padding:7px 13px;background:var(--s1);border:1px solid var(--border);border-radius:9px;transition:all .2s;white-space:nowrap}
 .soc:hover{color:var(--text);border-color:var(--accent);background:var(--s2);transform:translateY(-2px);box-shadow:0 4px 14px rgba(124,106,255,.2)}
 .soc i{font-size:.9rem}
@@ -193,20 +190,13 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:52
 /* HIDDEN */
 .card.hidden{display:none}
 @media(max-width:540px){.grid{grid-template-columns:1fr 1fr}.stats{max-width:100%}}
-@media(max-width:700px){.nav-socials{display:none}}
 </style>
 </head>
 <body>
 
 <nav>
-  <a class="logo" href="index.html" aria-label="ImageHub home"><img src="icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <a class="logo" href="index.html" aria-label="ImageHub home"><img src="../assets/icons/imagehub-logo.svg" alt=""/>ImageHub</a>
   <div class="nav-right">
-    <div class="nav-socials">
-      <a href="https://www.instagram.com/officialhazim42/" target="_blank" rel="noopener noreferrer" title="Instagram: officialhazim42"><i class="fab fa-instagram"></i></a>
-      <a href="https://x.com/officialhazim42" target="_blank" rel="noopener noreferrer" title="X: officialhazim42"><i class="fab fa-x-twitter"></i></a>
-      <a href="https://www.youtube.com/@officialhazim42" target="_blank" rel="noopener noreferrer" title="YouTube: officialhazim42"><i class="fab fa-youtube"></i></a>
-      <a href="https://github.com/officialhazim42" target="_blank" rel="noopener noreferrer" title="GitHub: officialhazim42"><i class="fab fa-github"></i></a>
-    </div>
     <button class="global-theme-toggle" id="globalThemeToggle" type="button" onclick="toggleTheme()" title="Toggle light/dark mode"><span class="t-label" id="themeLabel">Dark</span><span class="toggle-track"><span class="toggle-knob" id="themeKnob"><i class="fas fa-moon"></i></span></span></button>
     <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteMenu" title="Open menu"><i class="fas fa-bars"></i></button>
     <div class="site-menu" id="siteMenu" aria-hidden="true">
@@ -264,9 +254,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:52
 <div class="cat c-optimize" id="optimize">
   <div class="cat-head"><div class="cat-ic"><i class="fas fa-tachometer-alt"></i></div><div class="cat-name">Optimize</div><div class="cat-cnt">3 tools</div></div>
   <div class="grid">
-    <a class="card" href="tools/compress-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-compress-alt"></i></div><div class="c-name">Compress IMAGE</div><div class="c-desc">Shrink image file size while keeping quality.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
-    <a class="card" href="tools/upscale.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-expand-arrows-alt"></i></div><div class="c-name">Upscale</div><div class="c-desc">Enlarge images without losing sharpness.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
-    <a class="card" href="tools/remove-background.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-eraser"></i></div><div class="c-name">Remove Background</div><div class="c-desc">Cut out backgrounds automatically in one click.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/compress-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-compress-alt"></i></div><div class="c-name">Compress IMAGE</div><div class="c-desc">Shrink image file size while keeping quality.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/upscale.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-expand-arrows-alt"></i></div><div class="c-name">Upscale</div><div class="c-desc">Enlarge images without losing sharpness.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/remove-background.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-eraser"></i></div><div class="c-name">Remove Background</div><div class="c-desc">Cut out backgrounds automatically in one click.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
   </div>
 </div>
 
@@ -274,8 +264,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:52
 <div class="cat c-create" id="create">
   <div class="cat-head"><div class="cat-ic"><i class="fas fa-wand-magic-sparkles"></i></div><div class="cat-name">Create</div><div class="cat-cnt">2 tools</div></div>
   <div class="grid">
-    <a class="card" href="tools/meme-generator.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-face-laugh-squint"></i></div><div class="c-name">Meme Generator</div><div class="c-desc">Add captions to templates or your own images.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
-    <a class="card" href="tools/photo-editor.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-sliders-h"></i></div><div class="c-name">Photo Editor</div><div class="c-desc">Adjust brightness, filters, text and layers.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/meme-generator.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-face-laugh-squint"></i></div><div class="c-name">Meme Generator</div><div class="c-desc">Add captions to templates or your own images.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/photo-editor.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-sliders-h"></i></div><div class="c-name">Photo Editor</div><div class="c-desc">Adjust brightness, filters, text and layers.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
   </div>
 </div>
 
@@ -283,9 +273,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:52
 <div class="cat c-modify" id="modify">
   <div class="cat-head"><div class="cat-ic"><i class="fas fa-sliders-h"></i></div><div class="cat-name">Modify</div><div class="cat-cnt">3 tools</div></div>
   <div class="grid">
-    <a class="card" href="tools/resize-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-arrows-alt-h"></i></div><div class="c-name">Resize IMAGE</div><div class="c-desc">Change dimensions by pixels, percent or preset.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
-    <a class="card" href="tools/crop-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-crop-alt"></i></div><div class="c-name">Crop IMAGE</div><div class="c-desc">Trim to any size or aspect ratio you need.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
-    <a class="card" href="tools/rotate-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-redo"></i></div><div class="c-name">Rotate IMAGE</div><div class="c-desc">Rotate or flip images to any angle.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/resize-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-arrows-alt-h"></i></div><div class="c-name">Resize IMAGE</div><div class="c-desc">Change dimensions by pixels, percent or preset.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/crop-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-crop-alt"></i></div><div class="c-name">Crop IMAGE</div><div class="c-desc">Trim to any size or aspect ratio you need.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/rotate-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-redo"></i></div><div class="c-name">Rotate IMAGE</div><div class="c-desc">Rotate or flip images to any angle.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
   </div>
 </div>
 
@@ -293,9 +283,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:52
 <div class="cat c-convert" id="convert">
   <div class="cat-head"><div class="cat-ic"><i class="fas fa-arrows-rotate"></i></div><div class="cat-name">Convert</div><div class="cat-cnt">3 tools</div></div>
   <div class="grid">
-    <a class="card" href="tools/convert-to-jpg.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-file-import"></i></div><div class="c-name">Convert to JPG</div><div class="c-desc">Turn PNG, WebP, HEIC and more into JPG.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
-    <a class="card" href="tools/convert-from-jpg.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-file-export"></i></div><div class="c-name">Convert from JPG</div><div class="c-desc">Turn JPG into PNG, WebP or other formats.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
-    <a class="card" href="tools/html-to-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-code"></i></div><div class="c-name">HTML to IMAGE</div><div class="c-desc">Turn HTML code or any URL into an image.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/convert-to-jpg.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-file-import"></i></div><div class="c-name">Convert to JPG</div><div class="c-desc">Turn PNG, WebP, HEIC and more into JPG.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/convert-from-jpg.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-file-export"></i></div><div class="c-name">Convert from JPG</div><div class="c-desc">Turn JPG into PNG, WebP or other formats.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/html-to-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-code"></i></div><div class="c-name">HTML to IMAGE</div><div class="c-desc">Turn HTML code or any URL into an image.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
   </div>
 </div>
 
@@ -303,8 +293,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:52
 <div class="cat c-security" id="security">
   <div class="cat-head"><div class="cat-ic"><i class="fas fa-shield-alt"></i></div><div class="cat-name">Security</div><div class="cat-cnt">2 tools</div></div>
   <div class="grid">
-    <a class="card" href="tools/watermark-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-stamp"></i></div><div class="c-name">Watermark IMAGE</div><div class="c-desc">Stamp text or logo watermarks onto images.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
-    <a class="card" href="tools/blur-face.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-user-secret"></i></div><div class="c-name">Blur Face</div><div class="c-desc">Detect and blur faces to protect privacy.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/watermark-image.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-stamp"></i></div><div class="c-name">Watermark IMAGE</div><div class="c-desc">Stamp text or logo watermarks onto images.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
+    <a class="card" href="../tools/blur-face.html"><div class="fbadge">Free</div><div class="c-ico"><i class="fas fa-user-secret"></i></div><div class="c-name">Blur Face</div><div class="c-desc">Detect and blur faces to protect privacy.</div><div class="c-arr"><i class="fas fa-arrow-right"></i></div></a>
   </div>
 </div>
 
@@ -313,12 +303,6 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:52
 <footer>
   <div class="f-logo">ImageHub</div>
   <div class="f-by">Free forever · No sign-up · Files never leave your device</div>
-  <div class="socials">
-    <a class="soc" href="https://www.instagram.com/officialhazim42/" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram · officialhazim42</a>
-    <a class="soc" href="https://x.com/officialhazim42" target="_blank" rel="noopener noreferrer"><i class="fab fa-x-twitter"></i> X · officialhazim42</a>
-    <a class="soc" href="https://www.youtube.com/@officialhazim42" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube" style="color:#ff0000"></i> YouTube · officialhazim42</a>
-    <a class="soc" href="https://github.com/officialhazim42" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub · officialhazim42</a>
-  </div>
   <div class="f-bottom">
     <span class="f-copy">©ImageHub</span><div class="f-dot"></div>
     <span class="f-copy">All 13 tools free forever</span><div class="f-dot"></div>

@@ -5,16 +5,16 @@
 <title>HTML to IMAGE – ImageHub</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<link rel="stylesheet" href="shared.css"/>
+<link rel="stylesheet" href="../assets/css/shared.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="shared.js"></script>
+<script src="../assets/js/shared.js"></script>
 </head>
 <body>
 <div id="dlModal"></div>
 <nav>
-  <a class="logo" href="../index.html" aria-label="ImageHub home"><img src="../icons/imagehub-logo.svg" alt=""/>ImageHub</a>
+  <a class="logo" href="../pages/index.html" aria-label="ImageHub home"><img src="../assets/icons/imagehub-logo.svg" alt=""/>ImageHub</a>
   <div class="nav-right-tools">
-    <a class="back" href="../index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
+    <a class="back" href="../pages/index.html"><i class="fas fa-chevron-left"></i> All Tools</a>
     <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark">
       <span class="t-label" id="themeLabel">Dark</span>
       <div class="toggle-track"><div class="toggle-knob"><i class="fas fa-moon"></i></div></div>
@@ -85,8 +85,8 @@ async function downloadResult(){
   const out=document.getElementById('outCanvas');
   const blob=await canvasToBlob(out,'image/png');
   downloadBlob(blob,'html-render.png');
-  saveHistoryTool('HTML to IMAGE','tools/html-to-image.html');
+  saveHistoryTool('HTML to IMAGE','../tools/html-to-image.html');
 }
 </script>
-<div class="tool-footer"><a class="tf-logo" href="../index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
+<div class="tool-footer"><a class="tf-logo" href="../pages/index.html">ImageHub</a><p>Free forever · No sign-up · No uploads to server</p></div>
 </body></html>

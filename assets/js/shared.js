@@ -2,7 +2,7 @@
 (function(){
   const page=location.pathname.split('/').pop().replace(/\.html$/,'')||'index';
   const icon=page==='index'?'home':page;
-  const href=(location.pathname.includes('/tools/')?'../':'')+'icons/'+icon+'.svg';
+  const href='../assets/icons/'+icon+'.svg';
   const link=document.createElement('link');
   link.rel='icon';
   link.type='image/svg+xml';
@@ -32,17 +32,91 @@ function toggleTheme(){
 }
 document.addEventListener('DOMContentLoaded',applySavedTheme);
 
-document.addEventListener('DOMContentLoaded',()=>{
-  const footer=document.querySelector('.tool-footer');
-  if(footer&&!footer.querySelector('.footer-socials')){
-    footer.insertAdjacentHTML('beforeend',`<div class="footer-socials" aria-label="Official Hazim 42 social links">
-      <a href="https://www.instagram.com/officialhazim42/" target="_blank" rel="noopener noreferrer" aria-label="Instagram: officialhazim42"><i class="fab fa-instagram"></i><span>Instagram</span></a>
-      <a href="https://x.com/officialhazim42" target="_blank" rel="noopener noreferrer" aria-label="X: officialhazim42"><i class="fab fa-x-twitter"></i><span>X</span></a>
-      <a href="https://www.youtube.com/@officialhazim42" target="_blank" rel="noopener noreferrer" aria-label="YouTube: officialhazim42"><i class="fab fa-youtube"></i><span>YouTube</span></a>
-      <a href="https://github.com/officialhazim42" target="_blank" rel="noopener noreferrer" aria-label="GitHub: officialhazim42"><i class="fab fa-github"></i><span>GitHub</span></a>
-    </div>`);
+const developerSocials=[
+  {name:'Instagram',icon:'fa-instagram',handle:'@officialhazim42',url:'https://instagram.com/officialhazim42',appUrl:'instagram://user?username=officialhazim42'},
+  {name:'GitHub',icon:'fa-github',handle:'@officialhazim42',url:'https://github.com/officialhazim42'},
+  {name:'Reddit',icon:'fa-reddit-alien',handle:'u/officialhazim42',url:'https://www.reddit.com/user/officialhazim42',appUrl:'reddit://user/officialhazim42'},
+  {name:'Snapchat',icon:'fa-snapchat-ghost',handle:'@officialhazim42',url:'https://www.snapchat.com/add/officialhazim42',appUrl:'snapchat://add/officialhazim42'},
+  {name:'Discord',icon:'fa-discord',handle:'officialhazim42',url:'https://discord.com/users/officialhazim42',copy:'officialhazim42'},
+  {name:'Threads',icon:'fa-threads',handle:'@officialhazim42',url:'https://www.threads.net/@officialhazim42',appUrl:'threads://@officialhazim42'},
+  {name:'LinkedIn',icon:'fa-linkedin-in',handle:'hazim-bashir-faqeer',url:'https://www.linkedin.com/in/hazim-bashir-faqeer',appUrl:'linkedin://in/hazim-bashir-faqeer'},
+  {name:'X',icon:'fa-x-twitter',handle:'@officialhazim42',url:'https://x.com/officialhazim42'},
+  {name:'Telegram',icon:'fa-telegram',handle:'@officialhazim42',url:'https://t.me/officialhazim42',appUrl:'tg://resolve?domain=officialhazim42'},
+  {name:'YouTube',icon:'fa-youtube',handle:'@officialhazim42',url:'https://youtube.com/@officialhazim42'}
+];
+const featuredDeveloperSocials=developerSocials.filter(social=>['Instagram','GitHub','YouTube'].includes(social.name));
+
+function openDeveloperSocial(social,event){
+  if(!social)return;
+  if(social.copy){
+    event.preventDefault();
+    window.open(social.url,'_blank','noopener,noreferrer');
+    copyDeveloperText(social.copy,'Discord username copied',`Discord username: ${social.copy}`);
   }
-});
+  if(!social.appUrl || !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
+  event.preventDefault();
+  const started=Date.now();
+  window.location.href=social.appUrl;
+  window.setTimeout(()=>{
+    if(!document.hidden && Date.now()-started<1800)window.location.href=social.url;
+  },900);
+}
+
+function copyDeveloperText(text,successMessage,fallbackMessage){
+  if(!navigator.clipboard){
+    showDeveloperToast(fallbackMessage);
+    return;
+  }
+  navigator.clipboard.writeText(text).then(()=>showDeveloperToast(successMessage)).catch(()=>showDeveloperToast(fallbackMessage));
+}
+
+function openDeveloperEmail(event){
+  event.preventDefault();
+  const address='hazimbashirfaqeer@gmail.com';
+  const mailto=`mailto:${address}?subject=${encodeURIComponent('Connecting with Hazim Bashir')}`;
+  const started=Date.now();
+  window.location.href=mailto;
+  window.setTimeout(()=>{
+    if(!document.hidden && Date.now()-started>=1100){
+      copyDeveloperText(address,'Email address copied to clipboard',`Email: ${address}`);
+    }
+  },1100);
+}
+
+function showDeveloperToast(message){
+  const toast=document.getElementById('developerToast');
+  if(!toast)return;
+  toast.textContent=message;
+  toast.classList.add('show');
+  window.clearTimeout(showDeveloperToast.timer);
+  showDeveloperToast.timer=window.setTimeout(()=>toast.classList.remove('show'),2400);
+}
+
+function buildDeveloperPanel(){
+  if(document.getElementById('developerDock'))return;
+  const links=featuredDeveloperSocials.map(social=>`<a href="${social.url}" class="developer-social-link" target="_blank" rel="noopener noreferrer" aria-label="${social.name}: ${social.handle}" title="${social.name}" data-social="${social.name}"><i class="fab ${social.icon}"></i></a>`).join('');
+  const cards=developerSocials.map(social=>`<a href="${social.url}" class="developer-profile-link" target="_blank" rel="noopener noreferrer" data-social="${social.name}" aria-label="${social.name}: ${social.handle}"><i class="fab ${social.icon}"></i><span><strong>${social.name}</strong><small>${social.handle}</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>`).join('');
+  const dock=document.createElement('aside');
+  dock.id='developerDock';
+  dock.className='developer-dock';
+  dock.innerHTML=`<button class="developer-trigger" type="button" aria-expanded="false" aria-controls="developerBar" aria-label="Open developer information"><i class="fas fa-user"></i></button><div class="developer-bar" id="developerBar"><button class="developer-bar-copy" type="button" aria-label="Open developer profile"><strong>Designed and Developed by @officialhazim42</strong></button><button class="developer-open" type="button">About Developer</button><div class="developer-socials" aria-label="Developer social links">${links}</div></div></aside><div class="developer-modal" id="developerModal" aria-hidden="true"><div class="developer-dialog" role="dialog" aria-modal="true" aria-labelledby="developerTitle"><button class="developer-close" type="button" aria-label="Close developer information"><i class="fas fa-xmark"></i></button><div class="developer-header"><div class="developer-avatar"><i class="fas fa-code"></i></div><div><p class="developer-eyebrow">About the developer</p><h2 id="developerTitle">Hazim Bashir</h2><p class="developer-role">Android Developer &amp; Software Creator</p><div class="developer-badges"><span class="developer-badge urdu" lang="ur">حازم بشیر</span><span class="developer-badge">@officialhazim42</span></div><p class="developer-location"><i class="fas fa-location-dot"></i> Ganderbal, Jammu &amp; Kashmir, India</p></div></div><section class="developer-section"><h3>About Me</h3><p class="developer-intro">Hi, I'm Hazim Bashir (حازم بشیر), an independent software developer from Ganderbal, Jammu &amp; Kashmir, India. I specialize in designing modern, high-performance, and privacy-first Android applications using Kotlin and Jetpack Compose. My mission is to craft clean, offline-first mobile experiences that respect user data privacy without compromise.</p></section><section class="developer-section"><h3>Quick Information</h3><dl class="developer-facts"><div><dt>Full Name</dt><dd>Hazim Bashir (حازم بشیر)</dd></div><div><dt>Location</dt><dd>Ganderbal, Jammu &amp; Kashmir, India</dd></div><div><dt>Specialization</dt><dd>Android Development, Kotlin, and Jetpack Compose</dd></div><div><dt>Email</dt><dd><a class="developer-email" href="mailto:hazimbashirfaqeer@gmail.com?subject=Connecting%20with%20Hazim%20Bashir">hazimbashirfaqeer@gmail.com</a></dd></div></dl></section><section class="developer-section"><h3>Connect with the developer</h3><div class="developer-profile-grid">${cards}</div></section><p class="developer-footer">Crafted with care by Hazim Bashir (حازم بشیر) in Kashmir 🏔️</p><div class="developer-footer-socials"><span>Instagram: @officialhazim42</span><span>GitHub: @officialhazim42</span><span>YouTube: @officialhazim42</span><span>LinkedIn: hazim-bashir-faqeer</span></div><p class="developer-note">Social links open the official profile. Native apps are attempted first on supported mobile devices. Discord copies the username before opening the profile.</p></div></div><div class="developer-toast" id="developerToast" role="status" aria-live="polite"></div>`;
+  document.body.appendChild(dock);
+  const trigger=dock.querySelector('.developer-trigger');
+  const bar=dock.querySelector('.developer-bar');
+  const modal=dock.querySelector('.developer-modal');
+  const setExpanded=open=>{bar.classList.toggle('show',open);trigger.setAttribute('aria-expanded',String(open));trigger.setAttribute('aria-label',open?'Close developer information':'Open developer information');trigger.innerHTML=open?'<i class="fas fa-xmark"></i>':'<i class="fas fa-user"></i>';};
+  trigger.addEventListener('click',()=>setExpanded(!bar.classList.contains('show')));
+  const openModal=()=>{modal.classList.add('show');modal.setAttribute('aria-hidden','false');};
+  const attribution=dock.querySelector('.developer-bar-copy');
+  attribution.addEventListener('click',openModal);
+  dock.querySelector('.developer-open').addEventListener('click',event=>{event.stopPropagation();openModal();});
+  dock.querySelector('.developer-email').addEventListener('click',openDeveloperEmail);
+  dock.querySelector('.developer-close').addEventListener('click',()=>{modal.classList.remove('show');modal.setAttribute('aria-hidden','true');});
+  modal.addEventListener('click',event=>{if(event.target===modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}});
+  dock.querySelectorAll('[data-social]').forEach(link=>link.addEventListener('click',event=>openDeveloperSocial(developerSocials.find(social=>social.name===link.dataset.social),event)));
+}
+
+document.addEventListener('DOMContentLoaded',buildDeveloperPanel);
 
 const toolGuideMap = {
   'Compress IMAGE': {
@@ -99,7 +173,7 @@ const toolGuideMap = {
   }
 };
 
-function getGuideHref(){ return location.pathname.includes('/tools/') ? '../guides.html' : 'guides.html'; }
+function getGuideHref(){ return location.pathname.includes('/tools/') ? '../pages/guides.html' : 'guides.html'; }
 
 function getGuideSlug(label){ return label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
 
@@ -286,7 +360,7 @@ function resetToolUploadState(extraReset){
 document.addEventListener('DOMContentLoaded',()=>{
   const nav=document.querySelector('.nav-right-tools');
   if(!nav||document.getElementById('menuToggle'))return;
-  const base=location.pathname.includes('/tools/')?'../':'';
+  const base=location.pathname.includes('/tools/')?'../pages/':'';
   nav.insertAdjacentHTML('beforeend',`<button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteMenu" title="Open menu"><i class="fas fa-bars"></i></button>
     <div class="site-menu" id="siteMenu" aria-hidden="true">
       <div class="menu-heading"><span>ImageHub control center</span><small>Local only</small></div>
